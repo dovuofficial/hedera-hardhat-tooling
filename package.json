@@ -1,0 +1,21 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.4",
+    "@nomiclabs/hardhat-waffle": "^2.0.2",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.5.3",
+    "hardhat": "^2.9.2"
+  },
+  "dependencies": {
+    "@hashgraph/sdk": "^2.7.0",
+    "add": "^2.0.6",
+    "dotenv": "^14.2.0",
+    "module-alias": "^2.2.2",
+    "yarn": "^1.22.17"
+  },
+  "_moduleAliases": {
+    "hashgraph-support": "support"
+  }
+}
