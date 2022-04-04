@@ -9,7 +9,7 @@
     "hardhat": "^2.9.2"
   },
   "dependencies": {
-    "@hashgraph/sdk": "^2.7.0",
+    "@hashgraph/sdk": "^2.11.3",
     "add": "^2.0.6",
     "dotenv": "^14.2.0",
     "module-alias": "^2.2.2",

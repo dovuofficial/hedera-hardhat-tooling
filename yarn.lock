@@ -495,10 +495,10 @@
     "@ethersproject/properties" "^5.5.0"
     "@ethersproject/strings" "^5.5.0"
 
-"@grpc/grpc-js@^1.5.1":
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.5.3.tgz#fe78a40eab4e21a6044ff6f23798f712ea352a8f"
-  integrity sha512-q0xgaZ3ymUM+ZOhe1hdocVSdKHCnJ6llLSXcP+MqMXMyYPUZ3mzQOCxZ3Zkg+QZ7sZ950sn7hvueQrIJZumPZg==
+"@grpc/grpc-js@^1.5.3":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.6.1.tgz#01f5705e2fb4faa0bae6bb70bd9d7f0054d9435d"
+  integrity sha512-ix3rQS64rKL1s6CfIaRgnts+RNYZZ2NaYyTK7iimai6an/0GGDbukzy990hJ5vtKHjhaqJxJMB6Qq7BMZ0zZSQ==
   dependencies:
     "@grpc/proto-loader" "^0.6.4"
     "@types/node" ">=12.12.47"
@@ -528,24 +528,26 @@
     tweetnacl "^1.0.3"
     utf8 "^3.0.0"
 
-"@hashgraph/proto@2.1.2":
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/@hashgraph/proto/-/proto-2.1.2.tgz#beb3a38d91189560f34dcf7cc4c6696e6eb772b7"
-  integrity sha512-kuSZrKL6rvrqHltj+ZNr0zLsXqBJpVkchTBU7Wa++2Vzr7iuaH4kTKOozOcNKVgVDP8tEImOOP0DcyOb1t7VPQ==
+"@hashgraph/proto@2.1.5":
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/@hashgraph/proto/-/proto-2.1.5.tgz#665202dc2c0fe099a5a07018bc82a409cb0933be"
+  integrity sha512-7iKO98T3iS+V+Ddy3Ew7+u8nzFT8MjRs6HczPE2scCjwKRhsodtYfGyOxVji+HN6WDqZmylr1VJwhNy5de/CRQ==
   dependencies:
+    long "^4.0.0"
     protobufjs "^6.11.2"
 
-"@hashgraph/sdk@^2.7.0":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@hashgraph/sdk/-/sdk-2.7.0.tgz#87329a752daec00f12acf62b3f6e997aad9c3828"
-  integrity sha512-YAic6BxYJad922BpB7tWq+aNyF65DENOJvxolmrziv1w42KXMjzyk9ypEzCBhz8cmLyZiNt1tW2GhlwPfznhfw==
+"@hashgraph/sdk@^2.11.3":
+  version "2.11.3"
+  resolved "https://registry.yarnpkg.com/@hashgraph/sdk/-/sdk-2.11.3.tgz#e92acb30eca02a5b72c502e8c146d995f0f70338"
+  integrity sha512-49nA5Xl2B7MBxDruBaM9xvB0J8dRhgO8jcqsXuVI57m1EBiSNRzIWn4S51Nf2nqo5xoZRiMTGvfZbYXEIC9XLw==
   dependencies:
-    "@grpc/grpc-js" "^1.5.1"
+    "@grpc/grpc-js" "^1.5.3"
     "@hashgraph/cryptography" "^1.1.0-beta.5"
-    "@hashgraph/proto" "2.1.2"
+    "@hashgraph/proto" "2.1.5"
     bignumber.js "^9.0.2"
     crypto-js "^4.1.1"
     js-base64 "^3.7.2"
+    js-logger "^1.6.1"
     long "^4.0.0"
     protobufjs "^6.11.2"
     utf8 "^3.0.0"
@@ -4525,6 +4527,11 @@ js-base64@^3.6.1, js-base64@^3.7.2:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.7.2.tgz#816d11d81a8aff241603d19ce5761e13e41d7745"
   integrity sha512-NnRs6dsyqUXejqk/yv2aiXlAvOs56sLkX6nUdeaNezI5LFFLlsZjOThmwnrcwh5ZZRwZlCMnVAY3CvhIhoVEKQ==
+
+js-logger@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/js-logger/-/js-logger-1.6.1.tgz#8f09671b515e4a6f31dced8fdb8923432e2c60af"
+  integrity sha512-yTgMCPXVjhmg28CuUH8CKjU+cIKL/G+zTu4Fn4lQxs8mRFH/03QTNvEFngcxfg/gRDiQAOoyCKmMTOm9ayOzXA==
 
 js-sha3@0.8.0, js-sha3@^0.8.0:
   version "0.8.0"

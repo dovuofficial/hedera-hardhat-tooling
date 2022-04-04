@@ -3,15 +3,16 @@ const {
   ContractCreateTransaction,
   ContractExecuteTransaction,
   ContractCallQuery,
-  Hbar
+  Hbar,
 } = require("@hashgraph/sdk");
 
 /**
  * Base values for constants
  */
-const GAS_CONTRACT = 100000;
+const GAS_CONTRACT = 3000000;
 
 const getCompiledContractJson = (contract) => {
+
   try {
     return require(`${process.cwd()}/artifacts/contracts/${contract}.sol/${contract}.json`);
   } catch (e) {
@@ -68,32 +69,29 @@ const QueryContract = async (client, {
       throw `error calling contract: ${contractCallResult.errorMessage}`
   }
 
-  return contractCallResult.getString(0)
+  return contractCallResult
 }
 
-//TODO: WIP.
 const CallContract = async (client, {
   contractId,
   method,
-  params
+  params = null
 }) => {
-  const contractTransactionResponse = await new ContractExecuteTransaction()
+
+  const contractTransaction = await new ContractExecuteTransaction()
     .setContractId(contractId)
     .setGas(GAS_CONTRACT)
-    .setFunction(method)
-    .execute(client)
+    .setFunction(method, params)
+    .freezeWith(client)
 
-  //TODO: Add params for method.
+  const contractTransactionResponse = await contractTransaction.execute(client)
 
   const contractReceipt = await contractTransactionResponse.getReceipt(
     client
   );
 
-  const txStatus = contractReceipt.status
-
-  console.log("The transaction response is: " + txStatus.toString())
-
-  return txStatus
+  // Idk feels shit
+  return contractReceipt.status.toString() === 'SUCCESS'
 }
 
 // Curry Hashgraph client function... nom nom nom
