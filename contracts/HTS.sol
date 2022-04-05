@@ -33,29 +33,31 @@ contract HTS is HederaTokenService {
     // Testing the sending of tokens to this.
     function tokenTransfer(int64 tokenAmount) external {
 
+        // Reentrancy - state change before action
+        sentTokens[msg.sender] = tokenAmount;
+        treasuryTokens = tokenAmount;
+
         int response = HederaTokenService.transferToken(tokenAddress, msg.sender, address(this), tokenAmount);
 
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer Failed");
         }
-
-        sentTokens[msg.sender] = tokenAmount;
-        treasuryTokens = tokenAmount;
     }
 
     function tokenSendBack() external {
         require(sentTokens[msg.sender] > 1);
 
-        int64 returnTokens = sentTokens[msg.sender] / 2;
+        int64 returnTokens = sentTokens[msg.sender];// / 2;
+
+        // Reentrancy - state change before action
+        sentTokens[msg.sender] = 0;
+        treasuryTokens -= returnTokens;
 
         int response = HederaTokenService.transferToken(tokenAddress, address(this), msg.sender, returnTokens);
 
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer Failed");
         }
-
-        sentTokens[msg.sender] = 0;
-        treasuryTokens -= returnTokens;
     }
 
     function tokenDissociate() external {
