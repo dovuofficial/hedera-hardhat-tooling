@@ -1,9 +1,11 @@
 const {
   FileCreateTransaction,
+  FileAppendTransaction,
   ContractCreateTransaction,
   ContractExecuteTransaction,
   ContractCallQuery,
   Hbar,
+  PrivateKey
 } = require("@hashgraph/sdk");
 
 /**
@@ -11,8 +13,13 @@ const {
  */
 const GAS_CONTRACT = 3000000;
 
-const getCompiledContractJson = (contract) => {
+/**
+ * EVM can only accept bytecode up to 24kb as bytes (48kb in hex) which is the same as ethereum. The default chunk size is 2048kb.
+ * @type {number}
+ */
+const MAX_FILE_CHUNKS = 24
 
+const getCompiledContractJson = (contract) => {
   try {
     return require(`${process.cwd()}/artifacts/contracts/${contract}.sol/${contract}.json`);
   } catch (e) {
@@ -20,14 +27,49 @@ const getCompiledContractJson = (contract) => {
   }
 }
 
+/**
+ * This method focuses on the creation and deployment of a contract to Hedera, to ensure that the file is ready.
+ *
+ * 1. At first we generate a keypair for create and append functions
+ * 2. Next, we create the file then append it with our HEX bytecode, so that we may maximise the EVM limit
+ * 3. After the appending of the bytecode we may use the file reference to create the smart contract.
+ *
+ * @param client
+ * @param contractName
+ * @returns {Promise<*>}
+ */
 const createContractFile = async (client, contractName) => {
+
+  // Generate temporary keypair to create a file and append, beyond the 6KB limit
+  const privateKey = PrivateKey.generateED25519()
+
+  const fileCreateTx = new FileCreateTransaction()
+    .setKeys([privateKey.publicKey])
+    .freezeWith(client)
+
+  const signCreateTx = await fileCreateTx.sign(privateKey);
+  const submitTx = await signCreateTx.execute(client);
+  const fileReceipt = await submitTx.getReceipt(client);
+  const fileId = fileReceipt.fileId
+
+  // Get bytecode for contract
   const compiled = getCompiledContractJson(contractName)
   const bytecode = compiled.bytecode;
-  const fileCreateTx = new FileCreateTransaction().setContents(bytecode);
-  const submitTx = await fileCreateTx.execute(client);
-  const fileReceipt = await submitTx.getReceipt(client);
 
-  return fileReceipt.fileId
+  // Append the bytecode to n files, max **MAX_FILE_CHUNKS** EVM 48k limit
+  const appendTx = new FileAppendTransaction()
+    .setFileId(fileId)
+    .setContents(bytecode)
+    .setMaxChunks(MAX_FILE_CHUNKS)
+    .freezeWith(client)
+
+  const signTx = await appendTx.sign(privateKey);
+  const txResponse = await signTx.execute(client);
+
+  // Don't know if I need this here, I suspect that this may cause some issues without it, When creating contracts.
+  await txResponse.getReceipt(client);
+
+  return fileId
 }
 
 const CreateSmartContract = async (client, {
