@@ -1,6 +1,6 @@
 const Config = require("./config")
 const Environment = require("./constants/environment")
-const { Client } = require("@hashgraph/sdk")
+const { Client, Hbar } = require("@hashgraph/sdk")
 
 const { TESTNET, PREVIEWNET, MAINNET } = Environment
 
@@ -39,6 +39,7 @@ const getNodeNetworkClient = (networkEnv = TESTNET) => {
 		hederaNetworkClient = new Client({
 			network: network.nodes.network
 		}).setOperator(Config.accountId, Config.privateKey)
+			.setMaxTransactionFee(new Hbar(10))
 	}
 
 	return hederaNetworkClient
