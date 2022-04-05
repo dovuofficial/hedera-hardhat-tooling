@@ -42,5 +42,10 @@ task("deploy", "Deploy a hedera contract")
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.6.12"
+  solidity: "0.6.12",
+  // NOTE: Adding the optimiser by default, may remove later
+  optimizer: {
+    enabled: true,
+    runs: 1000,
+  },
 };
