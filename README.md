@@ -6,16 +6,61 @@ This is some simple tooling that you can utilise to start to work with Hedera Sm
 - A method to deploy contracts to testnet.
 - Example tests of simple smart contracts.
 - Basic scaffold of interacting and creating contracts for Hedera.
+- Example flow for reducing feedback loop for deployment/testing contracts
 
 Generally for users that are new to smart contracts having to deal with loop of compiling contracts then injecting them into the methods in order for them to be deployed onto the network can be a bit mysterious and challenging.
+
+# Understand the create, deploy, and test flow
+
+For newcomers of smart contracts it can be a challenge, the aim of these tools is to reduce the deploy/test loop of smart contracts to a single command.
+
+You can see all the commands in the Makefile, but this is effectively what happens.
+
+## Deploy
+
+This command deploys a smart contract to Hedera Testnet, it compiles the contract, then deploys.
+
+```
+make deploy CONTRACT=HTS
+```
+
+You can switch out the **CONTRACT** parameter to the name of whatever contract you are working on, after the automatic compile step it will attempt to intelligently seek the bytecode that was previously generated then deploy.
+
+In addition, in your **.env** a value will be injected that references the recently deployed contract, for **HTS** it would be **HTS_CONTRACT_ID**.
+
+## Test Contract
+
+This command allows you to test a given contract based on a given file format in your `/tests` directory, the file name must be in the lowercase form of the Contract's name.
+
+```
+make test-contract CONTRACT=HTS
+```
+
+If your contract is named **HTS.sol**, your test file is named **hts-contract.js**, inside of tests.
+
+The test file should use a reference to the contract ID that has been generated, so in the case of the **HTS** contract you can see being dynamically referenced.
+
+```javascript
+const contractId = process.env.HTS_CONTRACT_ID;
+```
+
+## Deploy and immediately test contract
+
+This final command combines the actions above So that you may created and deploy a contract, then straight after run tests against it.
+
+```
+make deploy-test CONTRACT=HTS
+```
+
+This command is going to be useful for Github actions and CI/CD pipelines as well as saving time.
 
 ## Notes
 
 This is early in development there isn't method binding to elegantly call methods in a fluent manner, But it's nice to have little pipeline to compile, deploy, and test.
 
-*It would be nice to be able to run tests without having to directly redeploy contracts every time.*
+Currently, our contract deploy functionality is based off of a constructor so if you are targeting different constructors you'll need to modify the deploy script.
 
-## How to use this:
+# How to use setup your env + Hardhat commands:
 
 Set up your `.env` from `.env.example` with your testnet credentials.
 
@@ -35,8 +80,8 @@ If you try to deploy contracts but they fail try compiling them, this will autom
 
 ## Deploying contracts to Hedera
 
-Use this commands to deploy contracts to the testnet, Later on will add support for production/preview releases. What this does is it looks the bike code that has been generated from the previous compile command and it uses that to inject into the Hedera services JavaScript methods.
-
+Use this commands to deploy contracts to the testnet, Later on will add support for production/preview releases. The hardhat system generates compiled bytecode that can be picked up through the Native Hedera libs without manual intervention.
+s
 `hardhat deploy --contract HelloWorld`
 
 ## Hardhat Help
