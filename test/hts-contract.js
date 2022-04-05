@@ -9,14 +9,13 @@ const {
   }
 } = require("hashgraph-support")
 
-describe("HTS contract can assoc tokens", function () {
+describe("A contract can associate and be sent tokens", function () {
 
   const destinationNetwork = Config.network
   const client = Network.getNodeNetworkClient(destinationNetwork)
   const hashgraph = Hashgraph(client);
 
-  // Swap out for contract
-  const contractId = '0.0.34117227';
+  const contractId = process.env.HTS_CONTRACT_ID;
 
   it("A contract can get the token id", async () => {
 
@@ -51,6 +50,15 @@ describe("HTS contract can assoc tokens", function () {
     expect(response).to.be.true;
   })
 
+  it("A user can check their balance in the contract", async () => {
+    const response = await hashgraph.contract.query({
+      contractId,
+      method: "getTokensForAddress"
+    })
+
+    expect(response.getUint64(0).toNumber()).to.equal(2)
+  })
+
   it("A contract can send back tokens", async () => {
 
     const response = await hashgraph.contract.call({
@@ -59,6 +67,15 @@ describe("HTS contract can assoc tokens", function () {
     })
 
     expect(response).to.be.true;
+  })
+
+  it("After removal a user's balance is 0", async () => {
+    const response = await hashgraph.contract.query({
+      contractId,
+      method: "getTokensForAddress"
+    })
+
+    expect(response.getUint64(0).toNumber()).to.equal(0)
   })
 
   it("A contract can dissociate a token", async () => {
