@@ -4,7 +4,6 @@ pragma solidity ^0.6.12;
 import "./libraries/hashgraph/HederaTokenService.sol";
 import "./libraries/hashgraph/HederaResponseCodes.sol";
 
-// TODO: This is currently suffering from TRANSACTION_OVERSIZE errors
 contract HTS is HederaTokenService {
 
     // This is the token address for DOVU
