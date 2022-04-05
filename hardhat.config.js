@@ -1,7 +1,9 @@
 require('dotenv').config();
 require('module-alias/register')
 require("@nomiclabs/hardhat-waffle");
-const {TokenId} = require("@hashgraph/sdk");
+
+const shell = require('shelljs')
+const { TokenId } = require("@hashgraph/sdk");
 
 const {
   Network,
@@ -31,6 +33,9 @@ task("deploy", "Deploy a hedera contract")
     }
 
     const contractId = await Hashgraph(client).contract.create(contractInitialisation)
+
+    // Inject the latest deployed contract ID into the env
+    shell.exec(`bin/update-contract-id ${args.contract} ${contractId.toString()}`)
 
     console.log('Contract id: ' + contractId.toString());
   });
