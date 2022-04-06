@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.6.12;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 import "./libraries/hashgraph/HederaTokenService.sol";
 import "./libraries/hashgraph/HederaResponseCodes.sol";
@@ -15,7 +15,7 @@ contract HTS is HederaTokenService {
     // This is the quantity of tokens in the contract treasury
     int64 treasuryTokens;
 
-    constructor(address _tokenAddress) public {
+    constructor(address _tokenAddress) {
         tokenAddress = _tokenAddress;
         treasuryTokens = 0;
     }

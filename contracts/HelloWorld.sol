@@ -1,14 +1,18 @@
-pragma solidity ^0.6.12;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-contract HelloWorld {
+// We're just going add open zeppelin, ownable.
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract HelloWorld is Ownable {
 
     string public message;
 
-    constructor(string memory initMessage) public {
-        message = initMessage;
+    constructor() {
+        message = 'hello';
     }
 
-    function update(string memory newMessage) public {
+    function update(string memory newMessage) public onlyOwner {
         message = newMessage;
     }
 
