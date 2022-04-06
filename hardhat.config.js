@@ -34,8 +34,11 @@ task("deploy", "Deploy a hedera contract")
 
     const contractId = await Hashgraph(client).contract.create(contractInitialisation)
 
+    // Check that contract test exist
+    shell.exec(`bin/check-for-contract-test ${args.contract.toUpperCase()}`)
+
     // Inject the latest deployed contract ID into the env
-    shell.exec(`bin/update-contract-id ${args.contract} ${contractId.toString()}`)
+    shell.exec(`bin/update-contract-id ${args.contract.toUpperCase()} ${contractId.toString()}`)
 
     console.log('Contract id: ' + contractId.toString());
   });
