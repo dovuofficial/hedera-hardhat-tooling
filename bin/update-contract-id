@@ -1,7 +1,7 @@
 # Small utility that allows us to inject new contract IDs into environment therefore being referenced in given tests.
 if grep -q $1_CONTRACT_ID. .env
 then
-    sed -i.bak -e "s/$1_CONTRACT_ID=.*/$1_CONTRACT_ID=$2/g" .env
+    sed -i '' -e "s/$1_CONTRACT_ID=.*/$1_CONTRACT_ID=$2/g" .env
 else
     echo "$1_CONTRACT_ID=$2" >> .env
 fi
