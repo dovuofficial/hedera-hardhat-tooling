@@ -1,0 +1,13 @@
+# This utility allows us to generate a new test class for a given contract if it doesn't previously exist
+NEW_TEST_LOCATION=$(echo $1 | tr '[:upper:]' '[:lower:]')-contract.js
+
+if [[ -f "test/$NEW_TEST_LOCATION" ]]; then
+    echo "$NEW_TEST_LOCATION test class for contract found"
+    exit
+fi
+
+# This copies the example test to the expected location
+cp test/stub/example-test-contract.js test/$NEW_TEST_LOCATION
+
+# Replace the placeholder contract ID for test class
+sed -i '' -e "s/REPLACEME/$(echo $1 | tr '[:lower:]' '[:upper:]')/g" test/$NEW_TEST_LOCATION
