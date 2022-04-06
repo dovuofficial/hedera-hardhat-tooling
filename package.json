@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.11.3",
+    "@openzeppelin/contracts": "^4.5.0",
     "add": "^2.0.6",
     "dotenv": "^14.2.0",
     "module-alias": "^2.2.2",
