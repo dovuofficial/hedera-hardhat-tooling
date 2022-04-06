@@ -46,13 +46,21 @@ const contractId = process.env.HTS_CONTRACT_ID;
 
 ## Deploy and immediately test contract
 
-This final command combines the actions above So that you may created and deploy a contract, then straight after run tests against it.
+This final command combines the actions above so that you may created and deploy a contract, then straight after run tests against it.
 
 ```
 make deploy-test CONTRACT=HTS
 ```
 
 This command is going to be useful for Github actions and CI/CD pipelines as well as saving time.
+
+Furthermore, when running these command a number of interesting things will happen:
+
+- A test js file will be generated for you automatically based on an example stub, if you haven't created it already.
+  - The stub includes a test that will always pass if your smart contract inherits the [Ownable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol) class.
+- Newly generated contract ids will be injected into your .env and related test classes.
+
+*tl;dr, create a new smart contract and run this command and the system will generate sensible and intelligent defaults.*
 
 ## Notes
 
