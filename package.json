@@ -15,6 +15,7 @@
     "dotenv": "^14.2.0",
     "module-alias": "^2.2.2",
     "shelljs": "^0.8.5",
+    "uuid": "^8.3.2",
     "yarn": "^1.22.17"
   },
   "_moduleAliases": {
