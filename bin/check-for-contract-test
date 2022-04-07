@@ -7,7 +7,7 @@ if [[ -f "test/$NEW_TEST_LOCATION" ]]; then
 fi
 
 # This copies the example test to the expected location
-cp test/stub/example-test-contract.js test/$NEW_TEST_LOCATION
+cp stub/example-test-contract.js test/$NEW_TEST_LOCATION
 
 # Replace the placeholder contract ID for test class
 sed -i '' -e "s/REPLACEME/$(echo $1 | tr '[:lower:]' '[:upper:]')/g" test/$NEW_TEST_LOCATION
