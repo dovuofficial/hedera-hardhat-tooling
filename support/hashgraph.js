@@ -3,6 +3,7 @@ const {
   FileAppendTransaction,
   ContractCreateTransaction,
   ContractExecuteTransaction,
+  TransactionRecordQuery,
   ContractCallQuery,
   Hbar,
   PrivateKey
@@ -98,13 +99,14 @@ const CreateSmartContract = async (client, {
 
 const QueryContract = async (client, {
   contractId,
-  method
+  method,
+  params
 }) => {
   const contractCallResult = await new ContractCallQuery()
     .setContractId(contractId)
     .setGas(GAS_CONTRACT)
     .setQueryPayment(new Hbar(10))
-    .setFunction(method)
+    .setFunction(method, params)
     .execute(client)
 
   if (contractCallResult.errorMessage) {
@@ -132,7 +134,6 @@ const CallContract = async (client, {
     client
   );
 
-  // Idk feels shit
   return contractReceipt.status.toString() === 'SUCCESS'
 }
 

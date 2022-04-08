@@ -6,7 +6,8 @@ const {
   Hashgraph,
   SDK: {
     ContractFunctionParameters,
-    AccountId
+    AccountId,
+    ReceiptStatusError
   },
 } = require("hashgraph-support")
 
@@ -83,12 +84,38 @@ describe("Testing a contract", function () {
           .addString(projectName)
           .addAddress(address)
       })
-
-      // This feels gross
-      expect(true).to.be.false
     } catch (e) {
-      expect(true).to.be.true
+      // Status is 33 -> CONTRACT_REVERT_EXECUTED = 33; //Contract REVERT OPCODE executed
+      expect(e).to.be.an.instanceOf(ReceiptStatusError)
     }
+  });
+
+  it('should not be able to see a contract that does not exist', async () => {
+    try {
+      await hashgraph.contract.query({
+        contractId: contractId,
+        method: "getAddressForProjectRef",
+        params: new ContractFunctionParameters()
+          .addString('no')
+      })
+    } catch (e) {
+      // Status is 33 -> CONTRACT_REVERT_EXECUTED = 33; //Contract REVERT OPCODE executed
+      expect(e).to.be.an.instanceOf(ReceiptStatusError)
+    }
+  });
+
+  it('should be able to see a contract that exists', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getAddressForProjectRef",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+    })
+
+    const accountId = AccountId.fromSolidityAddress(response.getAddress(0))
+
+
+    expect(accountId.toString()).to.equal(address);
   });
 
 
