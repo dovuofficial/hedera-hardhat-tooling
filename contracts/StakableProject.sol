@@ -15,7 +15,7 @@ import "./libraries/hashgraph/HederaResponseCodes.sol";
 */
 contract StakableProject is HederaTokenService, Ownable {
 
-    // TODO: Add some events
+    // TODO: Add some events (Will do this in the next version)
 
     // Initially this will be a mapping of projects to a balance
     // TODO: Later have a struct
@@ -81,7 +81,7 @@ contract StakableProject is HederaTokenService, Ownable {
         string memory name_
         , address projectAddress_
     ) external onlyOwner {
-        require(projectRefs[name_] == address(0));
+        require(projectRefs[name_] == address(0), "This project name reference has already been used.");
         require(projectBalances[projectAddress_] == 0); // Ensure that every address is unique
 
         projectRefs[name_] = projectAddress_;
@@ -89,8 +89,7 @@ contract StakableProject is HederaTokenService, Ownable {
 
     // This is a facet for claiming tokens
     function claimDemoTokensForStaking(int64 amount_) external hasTokensInTreasury {
-        require(amount_ <= maximumClaimableTokens);
-        require(totalClaimedTokensByUser[msg.sender] <= maximumClaimableTokens);
+        require(totalClaimedTokensByUser[msg.sender] + amount_ <= maximumClaimableTokens);
 
         totalClaimedTokensByUser[msg.sender] += amount_;
         treasuryTokens -= amount_;
@@ -141,6 +140,10 @@ contract StakableProject is HederaTokenService, Ownable {
 
     function getTreasuryBalance() external view returns (int64) {
         return treasuryTokens;
+    }
+
+    function getTotalTokensClaimed() external view returns (int64) {
+        return totalClaimedTokensByUser[msg.sender];
     }
 
     function getAddressForProjectRef(string memory ref_) external view hasProjectRef(ref_) returns (address)  {
