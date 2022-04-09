@@ -62,6 +62,27 @@ Furthermore, when running these command a number of interesting things will happ
 
 *tl;dr, create a new smart contract and run this command and the system will generate sensible and intelligent defaults.*
 
+# Stakeable Basic Contract
+
+This is the deployed stakable project for owner `0.01156`, that you may reference as a user.
+
+See the Demo Projects that have been added in the `add-demo-projects` hardhat command to get started claiming and staking/unstaking.
+
+I would implore you to read the JS tests for interacting with the contract, at use that as the basis for the frontend.
+
+```
+STAKABLEPROJECT_CONTRACT_ID=0.0.34168439
+```
+
+However, once you have configured your environment with your Hedera Creds you may deploy the contract run the tests and ensure that all the demo projects are in place, so that a fresh contract is owned by your credentials/account keys.
+
+This is a one step command to get everything started for you.
+
+```
+make deploy-test-stakable-base-contract
+```
+
+
 ## Notes
 
 This is early in development there isn't method binding to elegantly call methods in a fluent manner, But it's nice to have little pipeline to compile, deploy, and test.
