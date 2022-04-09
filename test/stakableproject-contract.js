@@ -7,14 +7,15 @@ const {
   SDK: {
     ContractFunctionParameters,
     AccountId,
-    ReceiptStatusError
+    ReceiptStatusError,
+    PrecheckStatusError
   },
 } = require("hashgraph-support")
 
 // Random string, for project generation
 const { v4: uuidv4 } = require('uuid');
 
-describe("Testing a contract", function () {
+describe("Testing a basic contract for stakable projects", function () {
 
   const destinationNetwork = Config.network
   const client = Network.getNodeNetworkClient(destinationNetwork)
@@ -41,28 +42,6 @@ describe("Testing a contract", function () {
     expect(accountId.toString()).to.equal(process.env.HEDERA_ACCOUNT_ID);
   })
 
-  it('Owner can add token balance to project', async () => {
-    const response = await hashgraph.contract.call({
-      contractId: contractId,
-      method: "addTokensToTreasury",
-      params: new ContractFunctionParameters()
-        .addInt64(1)
-    })
-
-    expect(response).to.be.true;
-  });
-
-  it('Owner/Anyone can query treasury balance', async () => {
-    const response = await hashgraph.contract.query({
-      contractId: contractId,
-      method: "getTreasuryBalance",
-    })
-
-    const balance = response.getInt64(0)
-
-    expect(balance.toNumber()).to.greaterThan(0);
-  });
-
   it('Owner can add a project to the contract', async () => {
     const response = await hashgraph.contract.call({
       contractId: contractId,
@@ -75,6 +54,28 @@ describe("Testing a contract", function () {
     expect(response).to.be.true;
   });
 
+  it('Owner can add token balance to a project', async () => {
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "addTokensToTreasury",
+      params: new ContractFunctionParameters()
+        .addInt64(10)
+    })
+
+    expect(response).to.be.true;
+  });
+
+  it('The treasury balance is updated', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getTreasuryBalance",
+    })
+
+    const balance = response.getInt64(0)
+
+    expect(balance.toNumber()).to.be.gte(10);
+  });
+
   it('Owner cannot add the same project to the contract', async () => {
     try {
       await hashgraph.contract.call({
@@ -85,7 +86,7 @@ describe("Testing a contract", function () {
           .addAddress(address)
       })
     } catch (e) {
-      // Status is 33 -> CONTRACT_REVERT_EXECUTED = 33; //Contract REVERT OPCODE executed
+      // This fails as part of a inline require state,emt
       expect(e).to.be.an.instanceOf(ReceiptStatusError)
     }
   });
@@ -99,8 +100,36 @@ describe("Testing a contract", function () {
           .addString('no')
       })
     } catch (e) {
-      // Status is 33 -> CONTRACT_REVERT_EXECUTED = 33; //Contract REVERT OPCODE executed
-      expect(e).to.be.an.instanceOf(ReceiptStatusError)
+      // This fails as part of a modifier check (See modifier: hasProjectRef)
+      expect(e).to.be.an.instanceOf(PrecheckStatusError)
+    }
+  });
+
+  it('should not be able view the user balance of contract that does not exist', async () => {
+    try {
+      await hashgraph.contract.query({
+        contractId: contractId,
+        method: "getUserTokensStakedToProject",
+        params: new ContractFunctionParameters()
+          .addString('no')
+      })
+    } catch (e) {
+      // This fails as part of a modifier check (See modifier: hasProjectRef)
+      expect(e).to.be.an.instanceOf(PrecheckStatusError)
+    }
+  });
+
+  it('should not be able view the entire balance of contract that does not exist', async () => {
+    try {
+      await hashgraph.contract.query({
+        contractId: contractId,
+        method: "numberOfTokensStakedToProject",
+        params: new ContractFunctionParameters()
+          .addString('no')
+      })
+    } catch (e) {
+      // This fails as part of a modifier check (See modifier: hasProjectRef)
+      expect(e).to.be.an.instanceOf(PrecheckStatusError)
     }
   });
 
@@ -112,11 +141,188 @@ describe("Testing a contract", function () {
         .addString(projectName)
     })
 
-    const accountId = AccountId.fromSolidityAddress(response.getAddress(0))
-
-
-    expect(accountId.toString()).to.equal(address);
+    expect(response.getAddress(0)).to.equal(address);
   });
 
+  it('Get zero balance of tokens staked to a project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getUserTokensStakedToProject",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+    })
 
+    expect(response.getInt64(0).toNumber()).to.equal(0);
+  });
+
+  // NOTE: On subsequent to contract runs the value was going to be greater than zero as the Treasury has loaded more tokens into the contract
+  it('Get zero or more (Subsequent runs) balance of total claimed tokens', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getTotalTokensClaimed"
+    })
+
+    expect(response.getInt64(0).toNumber()).to.be.gte(0);
+  });
+
+  // User claims tokens
+  it('User claims too many tokens', async () => {
+    try {
+      await hashgraph.contract.call({
+        contractId: contractId,
+        method: "claimDemoTokensForStaking",
+        params: new ContractFunctionParameters()
+          .addInt64(100)
+      })
+    } catch (e) {
+      // This fails as part of a modifier check (See modifier: hasProjectRef)
+      expect(e).to.be.an.instanceOf(ReceiptStatusError)
+    }
+  });
+
+  // This will default to fall back Subsequent runs with the same account
+  it('User claims maximum tokens', async () => {
+    try {
+      const response = await hashgraph.contract.call({
+        contractId: contractId,
+        method: "claimDemoTokensForStaking",
+        params: new ContractFunctionParameters()
+          .addInt64(10)
+      })
+
+      expect(response).to.be.true;
+    } catch (e) {
+      // NOTE: This is triggered on subsequent runs whereby this is the full back for same account claiming to0 many tokens
+      expect(e).to.be.an.instanceOf(ReceiptStatusError)
+    }
+  });
+
+  it('Get claimed token balance', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getTotalTokensClaimed"
+    })
+
+    expect(response.getInt64(0).toNumber()).to.equal(10);
+  });
+
+  // NOTE: On subsequent to contract runs the value was going to be greater than zero as the Treasury has loaded more tokens into the contract
+  it('Get Treasury balance reduces have to claim', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getTreasuryBalance"
+    })
+
+    expect(response.getInt64(0).toNumber()).to.be.gte(0);
+  });
+
+  it('User attempts to claim more tokens after initial claim', async () => {
+    try {
+      await hashgraph.contract.call({
+        contractId: contractId,
+        method: "claimDemoTokensForStaking",
+        params: new ContractFunctionParameters()
+          .addInt64(10)
+      })
+    } catch (e) {
+      // This fails as part of a modifier check (See modifier: hasProjectRef)
+      expect(e).to.be.an.instanceOf(ReceiptStatusError)
+    }
+  });
+
+  it('Get claimed token balance -- is same as before', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getTotalTokensClaimed"
+    })
+
+    expect(response.getInt64(0).toNumber()).to.equal(10);
+  });
+
+  it('User stakes tokens to a project that exists', async () => {
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "stakeTokensToProject",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+        .addInt64(1)
+    })
+
+    expect(response).to.be.true;
+  });
+
+  it('User can view individual balance of project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getUserTokensStakedToProject",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+    })
+
+    expect(response.getInt64(0).toNumber()).to.equal(1);
+  });
+
+  it('User can view entire balance of project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "numberOfTokensStakedToProject",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+    })
+
+    // When there are different actors staking towards a project the value below will be higher
+    expect(response.getInt64(0).toNumber()).to.be.gte(1);
+  });
+
+  // User stakes tokens to a project that exists
+  it('User unstakes too many tokens to a project that exists', async () => {
+    try {
+      await hashgraph.contract.call({
+        contractId: contractId,
+        method: "unstakeTokensFromProject",
+        params: new ContractFunctionParameters()
+          .addString(projectName)
+          .addInt64(100)
+      })
+    } catch (e) {
+      // This fails as part of a modifier check (See modifier: hasProjectRef)
+      expect(e).to.be.an.instanceOf(ReceiptStatusError)
+    }
+  });
+
+  // User stakes tokens to a project that exists
+  it('User unstakes tokens to a project that exists', async () => {
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "unstakeTokensFromProject",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+        .addInt64(1)
+    })
+
+    expect(response).to.be.true;
+  });
+
+  it('After unstake, user can view individual balance of project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getUserTokensStakedToProject",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+    })
+
+    expect(response.getInt64(0).toNumber()).to.equal(0);
+  });
+
+  it('After unstake, user can view entire balance of project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "numberOfTokensStakedToProject",
+      params: new ContractFunctionParameters()
+        .addString(projectName)
+    })
+
+    // When there are different actors staking towards a project the value below will be higher
+    expect(response.getInt64(0).toNumber()).to.be.gte(0);
+  });
 });
