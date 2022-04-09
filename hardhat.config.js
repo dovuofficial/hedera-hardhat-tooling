@@ -43,6 +43,42 @@ task("deploy", "Deploy a hedera contract")
     console.log('Contract id: ' + contractId.toString());
   });
 
+/**
+ * This task deploys some sensible defaults projects to the StakableProject Contract
+ *
+ * Run this once for a new StakableProject Contract
+ *
+ * WARN: This will only work once
+ */
+task("add-demo-projects", "Add initial demo projects to StakableProject ")
+  .setAction(async (args) => {
+
+    const destinationNetwork = args.destination || Config.network
+    const client = Network.getNodeNetworkClient(destinationNetwork)
+    const hashgraph = Hashgraph(client);
+    const contractId = process.env.STAKABLEPROJECT_CONTRACT_ID;
+
+    const addProject = async (projectName, address) => {
+      await hashgraph.contract.call({
+        contractId: contractId,
+        method: "addProject",
+        params: new ContractFunctionParameters()
+          .addString(projectName)
+          .addAddress(address)
+      })
+    }
+
+    try {
+      // TODO: In the future the project name and address will refer to the actual project and the token ID
+      await addProject('farm-one', TokenId.fromString('0.0.1').toSolidityAddress())
+      await addProject('farm-two', TokenId.fromString('0.0.2').toSolidityAddress())
+      await addProject('farm-three', TokenId.fromString('0.0.3').toSolidityAddress())
+    } catch (e) {
+      console.warn('If you are seeing this these projects have already been deployed onto the contract');
+    }
+  });
+
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
