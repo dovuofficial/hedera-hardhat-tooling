@@ -12,3 +12,12 @@ deploy-test:
 	make deploy CONTRACT=$(CONTRACT)
 	make test-contract CONTRACT=$(CONTRACT)
 
+## This is the solidity contract name
+CONTRACT = "StakableProject"
+
+## Simply a utility to get the contract into a state that is completely tested and employed given a custom environment/owner, with demo projects
+deploy-test-stakable-base-contract:
+	make deploy CONTRACT=$(CONTRACT)
+	hardhat add-demo-projects
+	make test-contract CONTRACT=$(CONTRACT)
+
