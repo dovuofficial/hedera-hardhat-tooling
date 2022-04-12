@@ -20,7 +20,6 @@ describe("Testing HelloStruct Contract", function () {
 
   it("A contract will run a test, ownable", async () => {
 
-    // Will run if a contract is Ownable
     const response = await hashgraph.contract.query({
       contractId: contractId,
       method: "owner",
@@ -33,7 +32,6 @@ describe("Testing HelloStruct Contract", function () {
 
   it("Will read the basic hello world string", async () => {
 
-    // Will run if a contract is Ownable
     const response = await hashgraph.contract.query({
       contractId: contractId,
       method: "getMessage",
