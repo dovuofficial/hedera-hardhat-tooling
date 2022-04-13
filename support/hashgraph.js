@@ -3,11 +3,16 @@ const {
   FileAppendTransaction,
   ContractCreateTransaction,
   ContractExecuteTransaction,
-  TransactionRecordQuery,
   ContractCallQuery,
   Hbar,
   PrivateKey
 } = require("@hashgraph/sdk");
+
+const {
+  Interface 
+} = require("@ethersproject/abi");
+
+const fs = require("fs");
 
 /**
  * Base values for constants
@@ -19,6 +24,7 @@ const GAS_CONTRACT = 3000000;
  * @type {number}
  */
 const MAX_FILE_CHUNKS = 24
+
 
 const getCompiledContractJson = (contract) => {
   try {
@@ -137,12 +143,48 @@ const CallContract = async (client, {
   return contractReceipt.status.toString() === 'SUCCESS'
 }
 
+// My bit, it's not as spicey as smithies.
+// Refactor this to work with call contract, possibly return tuple.
+const SubscribeToEmittedEvents = async (client, {
+  contractId,
+  method,
+  contract,
+  params = null,
+}) => {
+
+    const parsedJson = JSON.parse(fs.readFileSync(`./contracts/artifacts/${contract}.json`, 'utf8'));
+    const abiInterface = new Interface(parsedJson.abi);
+
+    const contractTransaction = await new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(GAS_CONTRACT)
+      .setFunction(method, params)
+      .freezeWith(client)
+
+    const contractTransactionResponse = await contractTransaction.execute(client);
+    const record = await contractTransactionResponse.getRecord(client);
+    // look through logs returned with getRecord.
+    const events = record.contractFunctionResult.logs.map(log => {
+     
+      // lets make it a little more readable.
+      const logStrHex = '0x'.concat(Buffer.from(log.data).toString('hex'));
+      const logTopics = log.topics.map(topic => {
+        return '0x'.concat(Buffer.from(topic).toString('hex'));
+      });
+      // parse this beauty
+      return abiInterface.parseLog({data: logStrHex, topics: logTopics});
+    });
+    // to read this: events[i].args.$param
+    return events;
+}
+
 // Curry Hashgraph client function... nom nom nom
 const Hashgraph = (client) => ({
   contract: {
     create: (initialisation) => CreateSmartContract(client, initialisation),
     call: (params) => CallContract(client, params),
-    query: (params) => QueryContract(client, params)
+    query: (params) => QueryContract(client, params),
+    sub: (params) => SubscribeToEmittedEvents(client, params)
   }
 })
 

@@ -9,7 +9,7 @@ const {
   Network,
   Config,
   Hashgraph,
-  SDK: {
+  SDK: { 
     ContractFunctionParameters
   }
 } = require("hashgraph-support")
@@ -29,7 +29,8 @@ task("deploy", "Deploy a hedera contract")
       contractName: args.contract,
       // Optional, injected into the constructor, in this case for the "HelloWorld" Contract
       constructorParams: new ContractFunctionParameters()
-        .addAddress(new TokenId(0,0, 34111069).toSolidityAddress())
+        .addAddress(new TokenId(0,0, 34185686).toSolidityAddress())
+        //.addAddress(new TokenId(0,0, 34111069).toSolidityAddress())
     }
 
     const contractId = await Hashgraph(client).contract.create(contractInitialisation)
