@@ -20,11 +20,6 @@ import "./libraries/hashgraph/HederaResponseCodes.sol";
 contract StakableProject is HederaTokenService, Ownable {
 
     // TODO: Become external, so that it can be imported
-    /**
-        @notice introducing Solidity
-        one line
-        at the time
-    **/
     struct Project {
         int64 balance;
         int64 verified_kgs; // We might add some claimable carbon
