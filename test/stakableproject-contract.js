@@ -26,6 +26,8 @@ describe("Testing a basic contract for stakable projects", function () {
 
   const baseVerifiedCarbon = 5;
 
+  const amount = 10; // for depositing, staking and unstaking.
+
   /**
    * The main problem with running these tests on her deployed contract is that the tokens/Treasury are in a mutable state.
    */
@@ -423,4 +425,50 @@ describe("Testing a basic contract for stakable projects", function () {
     // When there are different actors staking towards a project the value below will be higher
     expect(response.getInt64(0).toNumber()).to.be.gte(0);
   });
+
+  it('subscribed successfully to addTokenToTreasury events', async () => {
+    const returnedEvents = await hashgraph.contract.sub({
+      contractId: contractId,
+      method: "addTokensToTreasury",
+      contract: "StakableProject",
+      params: new ContractFunctionParameters()
+        .addInt64(amount),
+    });
+
+    expect(Config.accountId).to.equal(AccountId.fromSolidityAddress(returnedEvents[0].args.sender).toString());
+    expect(amount).to.equal(returnedEvents[0].args.amount);
+
+  });
+  // This needs to be last otherwise prev tests will fail due to extra being staked.
+  it('Subscribed successfully to stakeTokensToProject events', async () => {
+    const returnedEvents = await hashgraph.contract.sub({
+      contractId: contractId,
+      method: "stakeTokensToProject",
+      contract: "StakableProject",
+      params: new ContractFunctionParameters()
+      .addString(account_id)
+      .addInt64(amount),
+    });
+
+    expect(Config.accountId).to.equal(AccountId.fromSolidityAddress(returnedEvents[0].args.sender).toString());
+    expect(account_id).to.equal(returnedEvents[0].args.projectRef);
+    expect(amount).to.equal(returnedEvents[0].args.amount);
+  });
+
+  // This functions needs to follow stakeTokensToProject events test -> so we can unstake them and not get an err.
+  it('Subscribed successfully to unstakeTokensFromProject events', async () => {
+    const returnedEvents = await hashgraph.contract.sub({
+      contractId: contractId,
+      method: "unstakeTokensFromProject",
+      contract: "StakableProject",
+      params: new ContractFunctionParameters()
+      .addString(account_id)
+      .addInt64(amount),
+    });
+
+    expect(Config.accountId).to.equal(AccountId.fromSolidityAddress(returnedEvents[0].args.sender).toString());
+    expect(account_id).to.equal(returnedEvents[0].args.projectRef);
+    expect(amount).to.equal(returnedEvents[0].args.amount);
+  });
+
 });
