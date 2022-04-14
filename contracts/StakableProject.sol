@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT"
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -15,7 +15,16 @@ import "./libraries/hashgraph/HederaResponseCodes.sol";
 */
 contract StakableProject is HederaTokenService, Ownable {
 
-    // TODO: Add some events (Will do this in the next version)
+    // When a user has staked to a project.
+    event StakeComplete(address indexed sender, string projectRef, int64 amount);
+
+    // When a user has unstaked.
+    event Unstaked(address indexed sender, string projectRef, int64 amount);
+
+    // When the staking pool has been updated with tokens (fees, penalties, etc)
+    event TreasuryDeposit(address indexed sender, int64 amount);
+
+
 
     // Initially this will be a mapping of projects to a balance
     // TODO: Later have a struct
@@ -75,6 +84,7 @@ contract StakableProject is HederaTokenService, Ownable {
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer Failed");
         }
+        emit TreasuryDeposit(msg.sender, tokenAmount_);
     }
 
     function addProject(
@@ -119,6 +129,7 @@ contract StakableProject is HederaTokenService, Ownable {
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer Failed, do you have enough balance to pay?");
         }
+        emit StakeComplete(msg.sender, ref_, amount_);
     }
 
     function unstakeTokensFromProject(string memory ref_, int64 amount_) external hasProjectRef(ref_) {
@@ -134,6 +145,7 @@ contract StakableProject is HederaTokenService, Ownable {
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer failed to unstake tokens");
         }
+        emit Unstaked(msg.sender, ref_, amount_);
     }
 
     /** View Methods for reading state**/

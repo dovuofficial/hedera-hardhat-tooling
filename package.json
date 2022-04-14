@@ -9,10 +9,11 @@
     "hardhat": "^2.9.2"
   },
   "dependencies": {
-    "@hashgraph/sdk": "^2.11.3",
+    "@ethersproject/abi": "^5.6.1",
+    "@hashgraph/sdk": "^2.12.1",
     "@openzeppelin/contracts": "^4.5.0",
     "add": "^2.0.6",
-    "dotenv": "^14.2.0",
+    "dotenv": "^14.3.2",
     "module-alias": "^2.2.2",
     "shelljs": "^0.8.5",
     "uuid": "^8.3.2",

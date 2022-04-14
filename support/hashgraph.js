@@ -3,11 +3,16 @@ const {
   FileAppendTransaction,
   ContractCreateTransaction,
   ContractExecuteTransaction,
-  TransactionRecordQuery,
   ContractCallQuery,
   Hbar,
   PrivateKey
 } = require("@hashgraph/sdk");
+
+const {
+  Interface, LogDescription 
+} = require("@ethersproject/abi");
+
+const fs = require("fs");
 
 /**
  * Base values for constants
@@ -19,6 +24,7 @@ const GAS_CONTRACT = 3000000;
  * @type {number}
  */
 const MAX_FILE_CHUNKS = 24
+
 
 const getCompiledContractJson = (contract) => {
   try {
@@ -137,12 +143,63 @@ const CallContract = async (client, {
   return contractReceipt.status.toString() === 'SUCCESS'
 }
 
+/** 
+ *  This method focuses on triggering an event and returning the corresponding logs.
+ *  This method is seperate from CallContract() for now, as not all methods have associated events.
+ * 
+ *  1. Execute the function, provided as method param.
+ *  2. Read logs returned with txn record.
+ *  3. Process data & topics.
+ *  4. Returns parsed data.
+ * 
+ *  @param {client} client Hedera SDK client
+ *  @param {string} contractId Hedera Smart Contract ID 
+ *  @param {string} contract Contract Name, i.e. StakableProjects
+ *  @param {ContractFunctionParameters} params Hedera Function Parameters
+ * 
+ *  @returns {LogDescription[]}
+*/
+
+const SubscribeToEmittedEvents = async (client, {
+  contractId,
+  method,
+  contract,
+  params = null,
+}) => {
+    // Will look into refactoring this func. to work with call ~
+    // Can check against abi to see if there is event associated with func.
+    const parsedJson = JSON.parse(fs.readFileSync(`./contracts/artifacts/${contract}.json`, 'utf8'));
+    const abiInterface = new Interface(parsedJson.abi);
+
+    const contractTransaction = await new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(GAS_CONTRACT)
+      .setFunction(method, params)
+      .freezeWith(client)
+
+    const contractTransactionResponse = await contractTransaction.execute(client);
+    const record = await contractTransactionResponse.getRecord(client);
+    // look through logs returned with getRecord.
+    const events = record.contractFunctionResult.logs.map(log => {
+     
+      // lets make it a little more readable.
+      const logStrHex = '0x'.concat(Buffer.from(log.data).toString('hex'));
+      const logTopics = log.topics.map(topic => {
+        return '0x'.concat(Buffer.from(topic).toString('hex'));
+      });
+      return abiInterface.parseLog({data: logStrHex, topics: logTopics});
+    });
+    // to read this: events[i].args.$param
+    return events;
+}
+
 // Curry Hashgraph client function... nom nom nom
 const Hashgraph = (client) => ({
   contract: {
     create: (initialisation) => CreateSmartContract(client, initialisation),
     call: (params) => CallContract(client, params),
-    query: (params) => QueryContract(client, params)
+    query: (params) => QueryContract(client, params),
+    sub: (params) => SubscribeToEmittedEvents(client, params)
   }
 })
 
