@@ -37,7 +37,6 @@ contract StakableProject is HederaTokenService, Ownable {
     // When the staking pool has been updated with tokens (fees, penalties, etc)
     event TreasuryDeposit(address indexed sender, int64 amount);
 
-
     // Links a Dynamic NFT (dNFT) HTS token id to a project within the contract
     mapping (string => Project) projects;
 
@@ -59,8 +58,7 @@ contract StakableProject is HederaTokenService, Ownable {
 
     // This is the amount of claimable tokens that a user can claim with (doesn't stop HTS transfers)
     int64 maximumClaimableTokens = 10;
-
-
+    
     /** Modifier Methods **/
 
     modifier hasTokensInTreasury() {
@@ -76,20 +74,22 @@ contract StakableProject is HederaTokenService, Ownable {
     constructor(address tokenAddress_) {
         tokenAddress = tokenAddress_;
 
-        // Associate token as part of the constructor
-        int response = HederaTokenService.associateToken(address(this), tokenAddress);
-
-        if (response != HederaResponseCodes.SUCCESS) {
-            revert ("Treasury associate failed");
-        }
+        // Associate token as part of the constructor, If this fails hell has frozen over.
+        HederaTokenService.associateToken(address(this), tokenAddress);
     }
 
+    /**
+        @notice increase limit for tokens that can be claimed
+    **/
     function updateClaimableTokens(int64 amount_) external onlyOwner {
         require(amount_ > 0);
 
         maximumClaimableTokens = amount_;
     }
 
+    /**
+        @notice import treasury tokens from a owner to contract, will fail if owner's token balance is not high enough
+    **/
     function addTokensToTreasury(int64 tokenAmount_) external onlyOwner {
         treasuryTokens += tokenAmount_;
 
@@ -100,23 +100,45 @@ contract StakableProject is HederaTokenService, Ownable {
         }
     }
 
-    function addProject(string memory dnft_id_, int64 verified_kg) external onlyOwner {
+    /**
+        @notice add a project to the contract (through the owner)
+
+        @param dnft_id_: the id of the hedera entity/project (this could be HTS id, Account id, or DID)
+        @param verified_kg_: the amount of kgs to add to a project
+    **/
+    function addProject(string memory dnft_id_, int64 verified_kg_) external onlyOwner {
         require(!projects[dnft_id_].created, "Project already exists from id");
 
-        projects[dnft_id_] = Project(0, verified_kg, true);
+        projects[dnft_id_] = Project(0, verified_kg_, true);
     }
 
-    function addVerifiedCarbon(string memory dnft_id_, int64 verified_kg) external onlyOwner {
-        projects[dnft_id_].verified_kgs += verified_kg;
+    /**
+        @notice add verified carbon from a given project (Eventually to be multisig/DAO driven)
+
+        @param dnft_id_: the id of the hedera entity/project
+        @param verified_kg_: the amount of kgs add to a project
+    **/
+    function addVerifiedCarbon(string memory dnft_id_, int64 verified_kg_) external onlyOwner {
+        projects[dnft_id_].verified_kgs += verified_kg_;
     }
 
-    function removeVerifiedCarbon(string memory dnft_id_, int64 verified_kg) external onlyOwner {
-        require(projects[dnft_id_].verified_kgs - verified_kg >= 0, "Unable to remove verified carbon");
+    /**
+        @notice remove verified carbon from a given project (Eventually to be multisig/DAO driven)
 
-        projects[dnft_id_].verified_kgs -= verified_kg;
+        @param dnft_id_: the id of the hedera entity/project
+        @param verified_kg_: the amount of kgs to "unverify" from a project
+    **/
+    function removeVerifiedCarbon(string memory dnft_id_, int64 verified_kg_) external onlyOwner {
+        require(projects[dnft_id_].verified_kgs - verified_kg_ >= 0, "Unable to remove verified carbon");
+
+        projects[dnft_id_].verified_kgs -= verified_kg_;
     }
 
-    // This is a facet for claiming tokens
+    /**
+        @notice claim tokens from the contract to use for staking
+
+        @param amount_: the amount of tokens to claim for using in the contract (limit is "maximumClaimableTokens")
+    **/
     function claimDemoTokensForStaking(int64 amount_) external hasTokensInTreasury {
         require(totalClaimedTokensByUser[msg.sender] + amount_ <= maximumClaimableTokens);
 
@@ -134,7 +156,10 @@ contract StakableProject is HederaTokenService, Ownable {
     }
 
     /**
-    * Stake tokens to a given project
+        @notice stake tokens from a contract back to the account of a user
+
+        @param dnft_id_: the id of the entity that reputation energy (tokens) staked on it
+        @param amount_: the amount of tokens to remove (will revert if the balance of the user is too low)
     **/
     function stakeTokensToProject(string memory dnft_id_, int64 amount_) external hasProject(dnft_id_) {
 
@@ -150,6 +175,12 @@ contract StakableProject is HederaTokenService, Ownable {
         }
     }
 
+    /**
+        @notice unstake tokens from a contract back to the account of a user
+
+        @param dnft_id_: the id of the entity that reputation energy (tokens) staked on it
+        @param amount_: the amount of tokens to remove (could be too much)
+    **/
     function unstakeTokensFromProject(string memory dnft_id_, int64 amount_) external hasProject(dnft_id_) {
         require(sentTokens[dnft_id_][msg.sender] >= amount_, 'Unable to unstake that amount of tokens from project');
 
@@ -165,16 +196,26 @@ contract StakableProject is HederaTokenService, Ownable {
         }
     }
 
-    /** View Methods for reading state**/
+    /** @notice View Methods for reading state **/
 
+    /**
+        @notice The amount of tokens remaining in the treasury.
+    **/
     function getTreasuryBalance() external view returns (int64) {
         return treasuryTokens;
     }
 
+    /**
+        @notice the amount of tokens a user has claimed through the contract, a user/entity
+            may be able to receive tokens externally through HTS, in order to use this contract.
+    **/
     function getTotalTokensClaimed() external view returns (int64) {
         return totalClaimedTokensByUser[msg.sender];
     }
 
+    /**
+        @notice return the amount of verified carbon in kgs that has been assigned to an entity/project
+    **/
     function getVerifiedCarbonForProject(string memory dnft_id_) external view hasProject(dnft_id_) returns (int64)  {
         return projects[dnft_id_].verified_kgs;
     }
@@ -199,10 +240,16 @@ contract StakableProject is HederaTokenService, Ownable {
         return (_project.balance, _project.verified_kgs);
     }
 
+    /**
+        @notice retrieve the number of tokens that a entity has staked to it
+    **/
     function numberOfTokensStakedToProject(string memory dnft_id_) external view hasProject(dnft_id_) returns (int64)  {
         return projects[dnft_id_].balance;
     }
 
+    /**
+        @notice for a given entity return the number of tokens staked to it from a user
+    **/
     function getUserTokensStakedToProject(string memory dnft_id_) external view hasProject(dnft_id_) returns (int64) {
         return sentTokens[dnft_id_][msg.sender];
     }
