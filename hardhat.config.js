@@ -9,7 +9,7 @@ const {
   Network,
   Config,
   Hashgraph,
-  SDK: { 
+  SDK: {
     ContractFunctionParameters
   }
 } = require("hashgraph-support")

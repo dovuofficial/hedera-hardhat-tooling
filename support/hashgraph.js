@@ -9,7 +9,7 @@ const {
 } = require("@hashgraph/sdk");
 
 const {
-  Interface, LogDescription 
+  Interface, LogDescription
 } = require("@ethersproject/abi");
 
 const fs = require("fs");
@@ -143,20 +143,20 @@ const CallContract = async (client, {
   return contractReceipt.status.toString() === 'SUCCESS'
 }
 
-/** 
+/**
  *  This method focuses on triggering an event and returning the corresponding logs.
  *  This method is seperate from CallContract() for now, as not all methods have associated events.
- * 
+ *
  *  1. Execute the function, provided as method param.
  *  2. Read logs returned with txn record.
  *  3. Process data & topics.
  *  4. Returns parsed data.
- * 
+ *
  *  @param {client} client Hedera SDK client
- *  @param {string} contractId Hedera Smart Contract ID 
+ *  @param {string} contractId Hedera Smart Contract ID
  *  @param {string} contract Contract Name, i.e. StakableProjects
  *  @param {ContractFunctionParameters} params Hedera Function Parameters
- * 
+ *
  *  @returns {LogDescription[]}
 */
 
@@ -168,7 +168,8 @@ const SubscribeToEmittedEvents = async (client, {
 }) => {
     // Will look into refactoring this func. to work with call ~
     // Can check against abi to see if there is event associated with func.
-    const parsedJson = JSON.parse(fs.readFileSync(`./contracts/artifacts/${contract}.json`, 'utf8'));
+
+    const parsedJson = getCompiledContractJson(contract)
     const abiInterface = new Interface(parsedJson.abi);
 
     const contractTransaction = await new ContractExecuteTransaction()
@@ -179,9 +180,10 @@ const SubscribeToEmittedEvents = async (client, {
 
     const contractTransactionResponse = await contractTransaction.execute(client);
     const record = await contractTransactionResponse.getRecord(client);
+
     // look through logs returned with getRecord.
     const events = record.contractFunctionResult.logs.map(log => {
-     
+
       // lets make it a little more readable.
       const logStrHex = '0x'.concat(Buffer.from(log.data).toString('hex'));
       const logTopics = log.topics.map(topic => {

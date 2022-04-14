@@ -22,7 +22,9 @@ describe("Testing a basic contract for stakable projects", function () {
   const hashgraph = Hashgraph(client);
 
   const contractId = process.env.STAKABLEPROJECT_CONTRACT_ID;
-  const address = AccountId.fromString('0.0.1' + Math.floor(Math.random() * 100000)).toSolidityAddress()
+  const account_id = '0.0.1' + Math.floor(Math.random() * 100000)
+
+  const baseVerifiedCarbon = 5;
 
   const amount = 10; // for depositing, staking and unstaking.
 
@@ -49,8 +51,8 @@ describe("Testing a basic contract for stakable projects", function () {
       contractId: contractId,
       method: "addProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
-        .addAddress(address)
+        .addString(account_id)
+        .addInt64(baseVerifiedCarbon) // Add initial verified carbon
     })
 
     expect(response).to.be.true;
@@ -84,8 +86,8 @@ describe("Testing a basic contract for stakable projects", function () {
         contractId: contractId,
         method: "addProject",
         params: new ContractFunctionParameters()
-          .addString(projectName)
-          .addAddress(address)
+          .addString(account_id)
+          .addInt64(baseVerifiedCarbon) // Add initial verified carbon
       })
     } catch (e) {
       // This fails as part of a inline require state,emt
@@ -112,7 +114,7 @@ describe("Testing a basic contract for stakable projects", function () {
       await hashgraph.contract.query({
         contractId: contractId,
         method: "getUserTokensStakedToProject",
-        params: new ContractFunctionParameters() 
+        params: new ContractFunctionParameters()
           .addString('no')
       })
     } catch (e) {
@@ -135,23 +137,71 @@ describe("Testing a basic contract for stakable projects", function () {
     }
   });
 
-  it('should be able to see a contract that exists', async () => {
+  it('should be able to see the verified carbon for a project', async () => {
     const response = await hashgraph.contract.query({
       contractId: contractId,
-      method: "getAddressForProjectRef",
+      method: "getVerifiedCarbonForProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
     })
 
-    expect(response.getAddress(0)).to.equal(address);
+    expect(response.getInt64(0).toNumber()).to.equal(baseVerifiedCarbon);
   });
+
+  it('owner should be able to add verified carbon to project', async () => {
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "addVerifiedCarbon",
+      params: new ContractFunctionParameters()
+        .addString(account_id)
+        .addInt64(10)
+    })
+
+    expect(response).to.be.true;
+  });
+
+  it('should be able to see the updated verified carbon for a project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getVerifiedCarbonForProject",
+      params: new ContractFunctionParameters()
+        .addString(account_id)
+    })
+
+    expect(response.getInt64(0).toNumber()).to.equal(baseVerifiedCarbon + 10);
+  });
+
+
+  it('owner should be able to remove verified carbon to project', async () => {
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "removeVerifiedCarbon",
+      params: new ContractFunctionParameters()
+        .addString(account_id)
+        .addInt64(10)
+    })
+
+    expect(response).to.be.true;
+  });
+
+  it('should be able to see the updated verified carbon for a project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getVerifiedCarbonForProject",
+      params: new ContractFunctionParameters()
+        .addString(account_id)
+    })
+
+    expect(response.getInt64(0).toNumber()).to.equal(baseVerifiedCarbon);
+  });
+
 
   it('Get zero balance of tokens staked to a project', async () => {
     const response = await hashgraph.contract.query({
       contractId: contractId,
       method: "getUserTokensStakedToProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
     })
 
     expect(response.getInt64(0).toNumber()).to.equal(0);
@@ -241,16 +291,48 @@ describe("Testing a basic contract for stakable projects", function () {
     expect(response.getInt64(0).toNumber()).to.equal(10);
   });
 
+
+  it('User can see the current risk of project', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getCollateralRisk",
+      params: new ContractFunctionParameters()
+        .addString(account_id)
+    })
+
+    const balance = response.getInt256(0).toNumber()
+    const kg = response.getInt256(1).toNumber()
+
+    // 100% risk
+    expect(balance).to.equal(0);
+    expect(kg).to.equal(5);
+  });
+
   it('User stakes tokens to a project that exists', async () => {
     const response = await hashgraph.contract.call({
       contractId: contractId,
       method: "stakeTokensToProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
         .addInt64(1)
     })
 
     expect(response).to.be.true;
+  });
+
+  it('User can see the current risk of project, after staking', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getCollateralRisk",
+      params: new ContractFunctionParameters()
+        .addString(account_id)
+    })
+
+    const balance = response.getInt256(0).toNumber()
+    const kg = response.getInt256(1).toNumber()
+
+    // 100% risk as division is below 1.
+    expect(balance / kg).to.equal(0.2);
   });
 
   it('User can view individual balance of project', async () => {
@@ -258,7 +340,7 @@ describe("Testing a basic contract for stakable projects", function () {
       contractId: contractId,
       method: "getUserTokensStakedToProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
     })
 
     expect(response.getInt64(0).toNumber()).to.equal(1);
@@ -269,7 +351,7 @@ describe("Testing a basic contract for stakable projects", function () {
       contractId: contractId,
       method: "numberOfTokensStakedToProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
     })
 
     // When there are different actors staking towards a project the value below will be higher
@@ -283,7 +365,7 @@ describe("Testing a basic contract for stakable projects", function () {
         contractId: contractId,
         method: "unstakeTokensFromProject",
         params: new ContractFunctionParameters()
-          .addString(projectName)
+          .addString(account_id)
           .addInt64(100)
       })
     } catch (e) {
@@ -298,11 +380,27 @@ describe("Testing a basic contract for stakable projects", function () {
       contractId: contractId,
       method: "unstakeTokensFromProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
         .addInt64(1)
     })
 
     expect(response).to.be.true;
+  });
+
+  it('User can see the current risk of project, due to unstake', async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getCollateralRisk",
+      params: new ContractFunctionParameters()
+        .addString(account_id)
+    })
+
+    const balance = response.getInt256(0).toNumber()
+    const kg = response.getInt256(1).toNumber()
+
+    // 100% risk
+    expect(balance).to.equal(0);
+    expect(kg).to.equal(5);
   });
 
   it('After unstake, user can view individual balance of project', async () => {
@@ -310,7 +408,7 @@ describe("Testing a basic contract for stakable projects", function () {
       contractId: contractId,
       method: "getUserTokensStakedToProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
     })
 
     expect(response.getInt64(0).toNumber()).to.equal(0);
@@ -321,7 +419,7 @@ describe("Testing a basic contract for stakable projects", function () {
       contractId: contractId,
       method: "numberOfTokensStakedToProject",
       params: new ContractFunctionParameters()
-        .addString(projectName)
+        .addString(account_id)
     })
 
     // When there are different actors staking towards a project the value below will be higher
@@ -343,34 +441,33 @@ describe("Testing a basic contract for stakable projects", function () {
   });
   // This needs to be last otherwise prev tests will fail due to extra being staked.
   it('Subscribed successfully to stakeTokensToProject events', async () => {
-    returnedEvents = await hashgraph.contract.sub({
+    const returnedEvents = await hashgraph.contract.sub({
       contractId: contractId,
       method: "stakeTokensToProject",
       contract: "StakableProject",
       params: new ContractFunctionParameters()
-      .addString(projectName)
+      .addString(account_id)
       .addInt64(amount),
     });
-  
-    expect(Config.accountId).to.equal(AccountId.fromSolidityAddress(returnedEvents[0].args.sender).toString());
-    expect(projectName).to.equal(returnedEvents[0].args.projectRef);
-    expect(amount).to.equal(returnedEvents[0].args.amount);
 
+    expect(Config.accountId).to.equal(AccountId.fromSolidityAddress(returnedEvents[0].args.sender).toString());
+    expect(account_id).to.equal(returnedEvents[0].args.projectRef);
+    expect(amount).to.equal(returnedEvents[0].args.amount);
   });
 
   // This functions needs to follow stakeTokensToProject events test -> so we can unstake them and not get an err.
   it('Subscribed successfully to unstakeTokensFromProject events', async () => {
-    returnedEvents = await hashgraph.contract.sub({
+    const returnedEvents = await hashgraph.contract.sub({
       contractId: contractId,
       method: "unstakeTokensFromProject",
       contract: "StakableProject",
       params: new ContractFunctionParameters()
-      .addString(projectName)
+      .addString(account_id)
       .addInt64(amount),
     });
 
     expect(Config.accountId).to.equal(AccountId.fromSolidityAddress(returnedEvents[0].args.sender).toString());
-    expect(projectName).to.equal(returnedEvents[0].args.projectRef);
+    expect(account_id).to.equal(returnedEvents[0].args.projectRef);
     expect(amount).to.equal(returnedEvents[0].args.amount);
   });
 
