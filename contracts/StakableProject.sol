@@ -146,7 +146,6 @@ contract StakableProject is HederaTokenService, Ownable {
             revert ("Transfer failed to unstake tokens");
         }
         emit Unstaked(msg.sender, ref_, amount_);
-
     }
 
     /** View Methods for reading state**/
