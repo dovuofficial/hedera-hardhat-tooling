@@ -1,6 +1,6 @@
 /// @author Matt Smithies (DOVU Global Limited)
 
-/// SPDX-License-Identifier: MIT"
+/// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -31,7 +31,7 @@ contract StakableProject is HederaTokenService, Ownable {
     // When a user has staked to a project
     event StakeComplete(address indexed sender, string projectRef, int64 amount);
 
-    // When a user has unstaked
+    // When a user has unstaked.
     event Unstaked(address indexed sender, string projectRef, int64 amount);
 
     // When the staking pool has been updated with tokens (fees, penalties, etc)
@@ -58,7 +58,7 @@ contract StakableProject is HederaTokenService, Ownable {
 
     // This is the amount of claimable tokens that a user can claim with (doesn't stop HTS transfers)
     int64 maximumClaimableTokens = 10;
-    
+
     /** Modifier Methods **/
 
     modifier hasTokensInTreasury() {
@@ -98,6 +98,7 @@ contract StakableProject is HederaTokenService, Ownable {
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer Failed");
         }
+        emit TreasuryDeposit(msg.sender, tokenAmount_);
     }
 
     /**
@@ -173,6 +174,8 @@ contract StakableProject is HederaTokenService, Ownable {
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer Failed, do you have enough balance to pay?");
         }
+
+        emit StakeComplete(msg.sender, dnft_id_, amount_);
     }
 
     /**
@@ -194,6 +197,8 @@ contract StakableProject is HederaTokenService, Ownable {
         if (response != HederaResponseCodes.SUCCESS) {
             revert ("Transfer failed to unstake tokens");
         }
+
+        emit Unstaked(msg.sender, dnft_id_, amount_);
     }
 
     /** @notice View Methods for reading state **/
