@@ -82,6 +82,15 @@ This is a one step command to get everything started for you.
 make deploy-test-stakable-base-contract
 ```
 
+## Other contracts with tests, to use as inspiration
+
+### Timelock example
+
+As part of our staking contract We are aiming to add time lock capabilities for modifying longtime locks for the ability for users to undertake their value from a given project. This is a temporary measure for the basis of the hackathon.
+
+```
+make deploy-test-timelock
+```
 
 ## Notes
 
