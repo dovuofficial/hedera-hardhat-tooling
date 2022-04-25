@@ -21,3 +21,6 @@ deploy-test-stakable-base-contract:
 	hardhat add-demo-projects
 	make test-contract CONTRACT=$(CONTRACT)
 
+# Deploy timelock example contract and run tests
+deploy-test-timelock:
+	make deploy-test CONTRACT=TimelockExample
