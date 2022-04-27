@@ -7,6 +7,7 @@ This is some simple tooling that you can utilise to start to work with Hedera Sm
 - Example tests of simple smart contracts.
 - Basic scaffold of interacting and creating contracts for Hedera.
 - Example flow for reducing feedback loop for deployment/testing contracts
+- Checks for valid contract ids in ENV before attempting tests  
 
 Generally for users that are new to smart contracts having to deal with loop of compiling contracts then injecting them into the methods in order for them to be deployed onto the network can be a bit mysterious and challenging.
 

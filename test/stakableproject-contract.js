@@ -22,6 +22,11 @@ describe("Testing a basic contract for stakable projects", function () {
   const hashgraph = Hashgraph(client);
 
   const contractId = process.env.STAKABLEPROJECT_CONTRACT_ID;
+
+  if (!contractId) {
+    throw Error("STAKABLEPROJECT_CONTRACT_ID: NOT FOUND IN ENV, deploy with 'make deploy-test CONTRACT=\"ContractName\"' to generate in ENV")
+  }
+  
   const account_id = '0.0.1' + Math.floor(Math.random() * 100000)
 
   const baseVerifiedCarbon = 5;

@@ -17,6 +17,10 @@ describe("A contract can associate and be sent tokens", function () {
 
   const contractId = process.env.HTS_CONTRACT_ID;
 
+  if (!contractId) {
+    throw Error("HTS_CONTRACT_ID: NOT FOUND IN ENV, deploy with 'make deploy-test CONTRACT=\"ContractName\"' to generate in ENV")
+  }
+
   it("A contract can get the token id", async () => {
 
     const response = await hashgraph.contract.query({
