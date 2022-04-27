@@ -12,7 +12,7 @@ deploy-test:
 	make deploy CONTRACT=$(CONTRACT)
 	make test-contract CONTRACT=$(CONTRACT)
 
-## This is the solidity contract name
+## This is the solidity contract name (example of custom commands)
 CONTRACT = "StakableProject"
 
 ## Simply a utility to get the contract into a state that is completely tested and employed given a custom environment/owner, with demo projects
