@@ -18,6 +18,10 @@ describe("Testing HelloStruct Contract", function () {
 
   const contractId = process.env.HELLOSTRUCT_CONTRACT_ID;
 
+  if (!contractId) {
+    throw Error("HELLOSTRUCT_CONTRACT_ID: NOT FOUND IN ENV, deploy with 'make deploy-test CONTRACT=\"ContractName\"' to generate in ENV")
+  }
+
   it("A contract will run a test, ownable", async () => {
 
     const response = await hashgraph.contract.query({
@@ -59,5 +63,17 @@ describe("Testing HelloStruct Contract", function () {
     })
 
     expect(response.getString(0)).to.equal("Hello Again");
+  })
+
+  it("Contract will revert contract state value", async () => {
+
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "update",
+      params: new ContractFunctionParameters()
+        .addString('hello world')
+    })
+
+    expect(response).to.be.true;
   })
 });

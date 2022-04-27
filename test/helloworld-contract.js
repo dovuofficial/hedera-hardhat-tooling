@@ -18,6 +18,10 @@ describe("Testing Helloworld Ownable contracts", function () {
 
   const contractId = process.env.HELLOWORLD_CONTRACT_ID;
 
+  if (!contractId) {
+    throw Error("HELLOWORLD_CONTRACT_ID: NOT FOUND IN ENV, deploy with 'make deploy-test CONTRACT=\"ContractName\"' to generate in ENV")
+  }
+
   it("A contract can get owner address", async () => {
 
     const response = await hashgraph.contract.query({
