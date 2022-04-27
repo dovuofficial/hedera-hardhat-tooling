@@ -18,6 +18,10 @@ describe("Testing a contract", function () {
 
   const contractId = process.env.REPLACEME_CONTRACT_ID;
 
+  if (!contractId) {
+    throw Error("REPLACEME_CONTRACT_ID: NOT FOUND IN ENV, deploy with 'make deploy-test CONTRACT=\"ContractName\"' to generate in ENV")
+  }
+
   it("A contract will run a test", async () => {
 
     // Will run if a contract is Ownable
