@@ -1,5 +1,9 @@
 {
   "name": "hardhat-project",
+  "scripts": {
+    "lint": "npx prettier --check hardhat.config.js *.md 'contracts/**/*.sol' 'scripts/**/*.js' 'stub/**/*.js' 'support/**/*.js' 'test/**/*.js'",
+    "lint:fix": "npx prettier --write hardhat.config.js *.md 'contracts/**/*.sol' 'scripts/**/*.js' 'stub/**/*.js' 'support/**/*.js' 'test/**/*.js'"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.4",
     "@nomiclabs/hardhat-waffle": "^2.0.2",
