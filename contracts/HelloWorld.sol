@@ -5,18 +5,17 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract HelloWorld is Ownable {
-
     string public message;
 
     constructor() {
-        message = 'hello';
+        message = "hello";
     }
 
     function update(string memory newMessage) public onlyOwner {
         message = newMessage;
     }
 
-    function getMessage() public view returns(string memory) {
+    function getMessage() public view returns (string memory) {
         return message;
     }
 }

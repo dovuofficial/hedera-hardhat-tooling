@@ -5,7 +5,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract HelloStruct is Ownable {
-
     // This can be external -> https://solidity-by-example.org/structs
     struct Hello {
         string text;
@@ -18,11 +17,11 @@ contract HelloStruct is Ownable {
     }
 
     function update(string memory newHello_) public onlyOwner {
-//        hello = Hello(newHello_); // This also works
+        //        hello = Hello(newHello_); // This also works
         hello.text = newHello_;
     }
 
-    function getMessage() public view returns(string memory) {
+    function getMessage() public view returns (string memory) {
         return hello.text;
     }
 }

@@ -10,15 +10,14 @@ import "./libraries/hashgraph/HederaTokenService.sol";
 import "./libraries/hashgraph/HederaResponseCodes.sol";
 
 /**
-* This contract of the most basic approach to:
-*   1) Projects being able to be created to be staked against
-*   2) Uses been able to claim demo tokens to stack towards a project
-*   3) Uses being able to withdraw tokens from the project and then deposit them into another.
-*
-* Question? Should we used ReentrancyGuard for anything that calls HTS?
-*/
+ * This contract of the most basic approach to:
+ *   1) Projects being able to be created to be staked against
+ *   2) Uses been able to claim demo tokens to stack towards a project
+ *   3) Uses being able to withdraw tokens from the project and then deposit them into another.
+ *
+ * Question? Should we used ReentrancyGuard for anything that calls HTS?
+ */
 contract StakableProject is HederaTokenService, Ownable {
-
     // TODO: Become external, so that it can be imported
     struct Project {
         int64 balance;
@@ -38,20 +37,20 @@ contract StakableProject is HederaTokenService, Ownable {
     event TreasuryDeposit(address indexed sender, int64 amount);
 
     // Links a Dynamic NFT (dNFT) HTS token id to a project within the contract
-    mapping (string => Project) projects;
+    mapping(string => Project) projects;
 
     // Keep track of the number of projects that have been added to the contract
-    uint numberOfProjects = 0;
+    uint256 numberOfProjects = 0;
 
     // This is the token address for a demo token, that can be claimed and staked/unstaked
     address tokenAddress;
 
     // This is the quantity of tokens that different users to specific projects (dnft_id_)
-    mapping (string => mapping (address => int64)) sentTokens;
+    mapping(string => mapping(address => int64)) sentTokens;
 
     // Total claimed tokens by user, TODO: add note on why it doesn't reduce.
     // As a user can externally receive tokens for staking
-    mapping (address => int64) totalClaimedTokensByUser;
+    mapping(address => int64) totalClaimedTokensByUser;
 
     // This is the quantity of demo tokens in the contract treasury
     int64 treasuryTokens = 0;
@@ -62,7 +61,10 @@ contract StakableProject is HederaTokenService, Ownable {
     /** Modifier Methods **/
 
     modifier hasTokensInTreasury() {
-        require(treasuryTokens >= maximumClaimableTokens, "Token Treasury does not have enough value");
+        require(
+            treasuryTokens >= maximumClaimableTokens,
+            "Token Treasury does not have enough value"
+        );
         _;
     }
 
@@ -93,10 +95,15 @@ contract StakableProject is HederaTokenService, Ownable {
     function addTokensToTreasury(int64 tokenAmount_) external onlyOwner {
         treasuryTokens += tokenAmount_;
 
-        int response = HederaTokenService.transferToken(tokenAddress, msg.sender, address(this), tokenAmount_);
+        int256 response = HederaTokenService.transferToken(
+            tokenAddress,
+            msg.sender,
+            address(this),
+            tokenAmount_
+        );
 
         if (response != HederaResponseCodes.SUCCESS) {
-            revert ("Transfer Failed");
+            revert("Transfer Failed");
         }
         emit TreasuryDeposit(msg.sender, tokenAmount_);
     }
@@ -130,7 +137,10 @@ contract StakableProject is HederaTokenService, Ownable {
         @param verified_kg_: the amount of kgs to "unverify" from a project
     **/
     function removeVerifiedCarbon(string memory dnft_id_, int64 verified_kg_) external onlyOwner {
-        require(projects[dnft_id_].verified_kgs - verified_kg_ >= 0, "Unable to remove verified carbon");
+        require(
+            projects[dnft_id_].verified_kgs - verified_kg_ >= 0,
+            "Unable to remove verified carbon"
+        );
 
         projects[dnft_id_].verified_kgs -= verified_kg_;
     }
@@ -149,10 +159,15 @@ contract StakableProject is HederaTokenService, Ownable {
         // Don't care if this fails (needs testing)
         HederaTokenService.associateToken(address(this), tokenAddress);
 
-        int response = HederaTokenService.transferToken(tokenAddress, address(this), msg.sender, amount_);
+        int256 response = HederaTokenService.transferToken(
+            tokenAddress,
+            address(this),
+            msg.sender,
+            amount_
+        );
 
         if (response != HederaResponseCodes.SUCCESS) {
-            revert ("Transfer Failed");
+            revert("Transfer Failed");
         }
     }
 
@@ -162,17 +177,24 @@ contract StakableProject is HederaTokenService, Ownable {
         @param dnft_id_: the id of the entity that reputation energy (tokens) staked on it
         @param amount_: the amount of tokens to remove (will revert if the balance of the user is too low)
     **/
-    function stakeTokensToProject(string memory dnft_id_, int64 amount_) external hasProject(dnft_id_) {
-
+    function stakeTokensToProject(string memory dnft_id_, int64 amount_)
+        external
+        hasProject(dnft_id_)
+    {
         // Update token state for different projects
         projects[dnft_id_].balance += amount_;
         sentTokens[dnft_id_][msg.sender] += amount_;
 
         // This sends tokens into the Treasury, however we could have a separate account.
-        int response = HederaTokenService.transferToken(tokenAddress, msg.sender, address(this), amount_);
+        int256 response = HederaTokenService.transferToken(
+            tokenAddress,
+            msg.sender,
+            address(this),
+            amount_
+        );
 
         if (response != HederaResponseCodes.SUCCESS) {
-            revert ("Transfer Failed, do you have enough balance to pay?");
+            revert("Transfer Failed, do you have enough balance to pay?");
         }
 
         emit StakeComplete(msg.sender, dnft_id_, amount_);
@@ -184,18 +206,29 @@ contract StakableProject is HederaTokenService, Ownable {
         @param dnft_id_: the id of the entity that reputation energy (tokens) staked on it
         @param amount_: the amount of tokens to remove (could be too much)
     **/
-    function unstakeTokensFromProject(string memory dnft_id_, int64 amount_) external hasProject(dnft_id_) {
-        require(sentTokens[dnft_id_][msg.sender] >= amount_, 'Unable to unstake that amount of tokens from project');
+    function unstakeTokensFromProject(string memory dnft_id_, int64 amount_)
+        external
+        hasProject(dnft_id_)
+    {
+        require(
+            sentTokens[dnft_id_][msg.sender] >= amount_,
+            "Unable to unstake that amount of tokens from project"
+        );
 
         // Update token state for different projects
         projects[dnft_id_].balance -= amount_;
         sentTokens[dnft_id_][msg.sender] -= amount_;
 
         // Send tokens back to user
-        int response = HederaTokenService.transferToken(tokenAddress, address(this), msg.sender, amount_);
+        int256 response = HederaTokenService.transferToken(
+            tokenAddress,
+            address(this),
+            msg.sender,
+            amount_
+        );
 
         if (response != HederaResponseCodes.SUCCESS) {
-            revert ("Transfer failed to unstake tokens");
+            revert("Transfer failed to unstake tokens");
         }
 
         emit Unstaked(msg.sender, dnft_id_, amount_);
@@ -221,7 +254,12 @@ contract StakableProject is HederaTokenService, Ownable {
     /**
         @notice return the amount of verified carbon in kgs that has been assigned to an entity/project
     **/
-    function getVerifiedCarbonForProject(string memory dnft_id_) external view hasProject(dnft_id_) returns (int64)  {
+    function getVerifiedCarbonForProject(string memory dnft_id_)
+        external
+        view
+        hasProject(dnft_id_)
+        returns (int64)
+    {
         return projects[dnft_id_].verified_kgs;
     }
 
@@ -239,7 +277,12 @@ contract StakableProject is HederaTokenService, Ownable {
             - current kgs of verified carbon
         )
     **/
-    function getCollateralRisk(string memory dnft_id_) external view hasProject(dnft_id_) returns (int64, int64)  {
+    function getCollateralRisk(string memory dnft_id_)
+        external
+        view
+        hasProject(dnft_id_)
+        returns (int64, int64)
+    {
         Project memory _project = projects[dnft_id_];
 
         return (_project.balance, _project.verified_kgs);
@@ -248,14 +291,24 @@ contract StakableProject is HederaTokenService, Ownable {
     /**
         @notice retrieve the number of tokens that a entity has staked to it
     **/
-    function numberOfTokensStakedToProject(string memory dnft_id_) external view hasProject(dnft_id_) returns (int64)  {
+    function numberOfTokensStakedToProject(string memory dnft_id_)
+        external
+        view
+        hasProject(dnft_id_)
+        returns (int64)
+    {
         return projects[dnft_id_].balance;
     }
 
     /**
         @notice for a given entity return the number of tokens staked to it from a user
     **/
-    function getUserTokensStakedToProject(string memory dnft_id_) external view hasProject(dnft_id_) returns (int64) {
+    function getUserTokensStakedToProject(string memory dnft_id_)
+        external
+        view
+        hasProject(dnft_id_)
+        returns (int64)
+    {
         return sentTokens[dnft_id_][msg.sender];
     }
 }

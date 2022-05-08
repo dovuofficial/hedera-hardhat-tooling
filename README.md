@@ -1,4 +1,4 @@
-# Hedera Smart Contract deployments and testing 
+# Hedera Smart Contract deployments and testing
 
 This is some simple tooling that you can utilise to start to work with Hedera Smart contracts, in particular:
 
@@ -7,7 +7,7 @@ This is some simple tooling that you can utilise to start to work with Hedera Sm
 - Example tests of simple smart contracts.
 - Basic scaffold of interacting and creating contracts for Hedera.
 - Example flow for reducing feedback loop for deployment/testing contracts
-- Checks for valid contract ids in ENV before attempting tests  
+- Checks for valid contract ids in ENV before attempting tests
 
 Generally for users that are new to smart contracts having to deal with loop of compiling contracts then injecting them into the methods in order for them to be deployed onto the network can be a bit mysterious and challenging.
 
@@ -61,7 +61,7 @@ Furthermore, when running these command a number of interesting things will happ
   - The stub includes a test that will always pass if your smart contract inherits the [Ownable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol) class.
 - Newly generated contract ids will be injected into your .env and related test classes.
 
-*tl;dr, create a new smart contract and run this command and the system will generate sensible and intelligent defaults.*
+_tl;dr, create a new smart contract and run this command and the system will generate sensible and intelligent defaults._
 
 # Stakeable Basic Contract
 
@@ -125,7 +125,7 @@ s
 
 ## Hardhat Help
 
-You just come in below to interrogates what methods are available for hardhat, it is mainly an EVM To however this project is just modifying and enhancing for basic contract integration and deployment. 
+You just come in below to interrogates what methods are available for hardhat, it is mainly an EVM To however this project is just modifying and enhancing for basic contract integration and deployment.
 
 ```
 npx hardhat help
