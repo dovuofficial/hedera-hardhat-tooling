@@ -1,4 +1,4 @@
-# Hedera Smart Contract deployments and testing 
+# Hedera Smart Contract deployments and testing
 
 This is some simple tooling that you can utilise to start to work with Hedera Smart contracts, in particular:
 
@@ -7,7 +7,7 @@ This is some simple tooling that you can utilise to start to work with Hedera Sm
 - Example tests of simple smart contracts.
 - Basic scaffold of interacting and creating contracts for Hedera.
 - Example flow for reducing feedback loop for deployment/testing contracts
-- Checks for valid contract ids in ENV before attempting tests  
+- Checks for valid contract ids in ENV before attempting tests
 
 Generally for users that are new to smart contracts having to deal with loop of compiling contracts then injecting them into the methods in order for them to be deployed onto the network can be a bit mysterious and challenging.
 
@@ -125,8 +125,22 @@ s
 
 ## Hardhat Help
 
-You just come in below to interrogates what methods are available for hardhat, it is mainly an EVM To however this project is just modifying and enhancing for basic contract integration and deployment. 
+You just come in below to interrogates what methods are available for hardhat, it is mainly an EVM To however this project is just modifying and enhancing for basic contract integration and deployment.
 
 ```
 npx hardhat help
 ```
+
+## Hardhat Shorthand (hh)
+
+`hardhat-shorthand` is an NPM package that installs a globally accessible binary called `hh` that runs the project's locally installed `hardhat` and supports shell autocompletion for tasks.
+
+### Installation
+
+To use the Hardhat shorthand you need to install it **globally**:
+
+```
+npm i -g hardhat-shorthand
+```
+
+After doing this running `hh` will be equivalent to running `npx hardhat`. For example, instead of running `npx hardhat compile` you can run `hh compile`.
