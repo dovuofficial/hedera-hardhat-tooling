@@ -1,5 +1,5 @@
 module.exports = {
-	MAINNET: "mainnet",
-	TESTNET: "testnet",
-	PREVIEWNET: "previewnet"
-}
+  MAINNET: "mainnet",
+  TESTNET: "testnet",
+  PREVIEWNET: "previewnet",
+};

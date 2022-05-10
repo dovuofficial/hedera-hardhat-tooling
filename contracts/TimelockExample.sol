@@ -10,11 +10,10 @@ import "./libraries/hashgraph/HederaTokenService.sol";
 import "./libraries/hashgraph/HederaResponseCodes.sol";
 
 /**
-* What we are trying to achieve here is to create a basic contract with a time lock mechanism that allows us to modify the time lock as well
-*/
+ * What we are trying to achieve here is to create a basic contract with a time lock mechanism that allows us to modify the time lock as well
+ */
 contract TimelockExample is HederaTokenService, Ownable {
-
-    uint timelock;
+    uint256 timelock;
 
     bool lockTimeChange = true;
 
@@ -31,11 +30,11 @@ contract TimelockExample is HederaTokenService, Ownable {
         return lockTimeChange || timelock > block.timestamp;
     }
 
-    function addDays(uint amount_) public canChangeTime {
+    function addDays(uint256 amount_) public canChangeTime {
         timelock += amount_ * 1 days;
     }
 
-    function removeDays(uint amount_) public canChangeTime {
+    function removeDays(uint256 amount_) public canChangeTime {
         timelock -= amount_ * 1 days;
     }
 
@@ -43,7 +42,7 @@ contract TimelockExample is HederaTokenService, Ownable {
         lockTimeChange = lockTimeChange_;
     }
 
-    function getBlockTimeStamp() public view returns (uint) {
+    function getBlockTimeStamp() public view returns (uint256) {
         return block.timestamp;
     }
 }

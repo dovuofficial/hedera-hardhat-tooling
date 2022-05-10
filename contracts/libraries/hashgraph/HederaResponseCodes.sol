@@ -2,7 +2,6 @@
 pragma solidity >=0.4.9 <0.9.0;
 
 abstract contract HederaResponseCodes {
-
     // response codes
     int32 internal constant OK = 0; // The transaction passed the precheck validations.
     int32 internal constant INVALID_TRANSACTION = 1; // For any error not handled by specific error codes listed below.

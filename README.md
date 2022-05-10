@@ -61,7 +61,7 @@ Furthermore, when running these command a number of interesting things will happ
   - The stub includes a test that will always pass if your smart contract inherits the [Ownable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol) class.
 - Newly generated contract ids will be injected into your .env and related test classes.
 
-*tl;dr, create a new smart contract and run this command and the system will generate sensible and intelligent defaults.*
+_tl;dr, create a new smart contract and run this command and the system will generate sensible and intelligent defaults._
 
 # Stakeable Basic Contract
 

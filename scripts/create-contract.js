@@ -8,7 +8,7 @@
 require("@nomiclabs/hardhat-web3");
 
 task("balance", "Prints an account's balance").setAction(async () => {
-  return 'hello balance'
+  return "hello balance";
 });
 
 module.exports = {};
