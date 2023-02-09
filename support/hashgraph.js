@@ -15,7 +15,7 @@ const fs = require("fs");
 /**
  * Base values for constants
  */
-const GAS_CONTRACT = 3000000;
+const GAS_CONTRACT = 100000;
 
 /**
  * EVM can only accept bytecode up to 24kb as bytes (48kb in hex) which is the same as ethereum. The default chunk size is 2048kb.
@@ -102,10 +102,15 @@ const CreateSmartContract = async (
   return contractReceipt.contractId;
 };
 
-const QueryContract = async (client, { contractId, method, params }) => {
+const QueryContract = async (client, {
+  contractId,
+  method,
+  gas = GAS_CONTRACT,
+  params
+}) => {
   const contractCallResult = await new ContractCallQuery()
     .setContractId(contractId)
-    .setGas(GAS_CONTRACT)
+    .setGas(gas)
     .setQueryPayment(new Hbar(10))
     .setFunction(method, params)
     .execute(client);
@@ -114,13 +119,20 @@ const QueryContract = async (client, { contractId, method, params }) => {
     throw `error calling contract: ${contractCallResult.errorMessage}`;
   }
 
-  return contractCallResult;
-};
+  return contractCallResult
+}
+
+const CallContract = async (client, {
+  contractId,
+  method,
+  gas = GAS_CONTRACT,
+  params = null
+}) => {
 
 const CallContract = async (client, { contractId, method, params = null }) => {
   const contractTransaction = await new ContractExecuteTransaction()
     .setContractId(contractId)
-    .setGas(GAS_CONTRACT)
+    .setGas(gas)
     .setFunction(method, params)
     .freezeWith(client);
 
