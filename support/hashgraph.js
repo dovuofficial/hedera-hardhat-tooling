@@ -15,7 +15,7 @@ const fs = require("fs");
 /**
  * Base values for constants
  */
-const GAS_CONTRACT = 100000;
+const GAS_CONTRACT = 1000000;
 
 /**
  * EVM can only accept bytecode up to 24kb as bytes (48kb in hex) which is the same as ethereum. The default chunk size is 2048kb.
