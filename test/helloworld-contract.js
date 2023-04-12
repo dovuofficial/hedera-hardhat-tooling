@@ -30,4 +30,42 @@ describe("Testing Helloworld Ownable contracts", function () {
 
     expect(accountId.toString()).to.equal(process.env.HEDERA_ACCOUNT_ID);
   });
+
+  it("Will read the basic hello world string", async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getMessage",
+    });
+
+    expect(response.getString(0)).to.equal("hello");
+  });
+
+  it("Contract can pass a string value", async () => {
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "update",
+      params: new ContractFunctionParameters().addString("Hello Again"),
+    });
+
+    expect(response).to.be.true;
+  });
+
+  it("Will read the updated string", async () => {
+    const response = await hashgraph.contract.query({
+      contractId: contractId,
+      method: "getMessage",
+    });
+
+    expect(response.getString(0)).to.equal("Hello Again");
+  });
+
+  it("Contract will revert contract state value", async () => {
+    const response = await hashgraph.contract.call({
+      contractId: contractId,
+      method: "update",
+      params: new ContractFunctionParameters().addString("hello"),
+    });
+
+    expect(response).to.be.true;
+  });
 });
