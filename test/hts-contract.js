@@ -27,7 +27,7 @@ describe("A contract can associate and be sent tokens", function () {
     });
 
     expect(response.getAddress(0)).to.equal(
-      "0000000000000000000000000000000002087e5d"
+      "000000000000000000000000000000000209a1d6"
     );
   });
 
