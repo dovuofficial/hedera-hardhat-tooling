@@ -24,7 +24,7 @@ abstract contract HederaTokenService {
     /// @param transferList the list of hbar transfers to do
     /// @param tokenTransfers the list of transfers to do
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
-    /// @custom:version 0.3.0 the signature of the previous version was cryptoTransfer(TokenTransferList[] memory tokenTransfers)
+    /// @dev 0.3.0 the signature of the previous version was cryptoTransfer(TokenTransferList[] memory tokenTransfers)
     function cryptoTransfer(
         IHederaTokenService.TransferList memory transferList,
         IHederaTokenService.TokenTransferList[] memory tokenTransfers

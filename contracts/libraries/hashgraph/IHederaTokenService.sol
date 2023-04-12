@@ -146,47 +146,47 @@ interface IHederaTokenService {
 
     /// Additional post creation fungible and non fungible properties of a Hedera Token.
     struct TokenInfo {
-        /// Basic properties of a Hedera Token
+        // Basic properties of a Hedera Token
         HederaToken token;
-        /// The number of tokens (fungible) or serials (non-fungible) of the token
+        // The number of tokens (fungible) or serials (non-fungible) of the token
         int64 totalSupply;
-        /// Specifies whether the token is deleted or not
+        // Specifies whether the token is deleted or not
         bool deleted;
-        /// Specifies whether the token kyc was defaulted with KycNotApplicable (true) or Revoked (false)
+        // Specifies whether the token kyc was defaulted with KycNotApplicable (true) or Revoked (false)
         bool defaultKycStatus;
-        /// Specifies whether the token is currently paused or not
+        // Specifies whether the token is currently paused or not
         bool pauseStatus;
-        /// The fixed fees collected when transferring the token
+        // The fixed fees collected when transferring the token
         FixedFee[] fixedFees;
-        /// The fractional fees collected when transferring the token
+        // The fractional fees collected when transferring the token
         FractionalFee[] fractionalFees;
-        /// The royalty fees collected when transferring the token
+        // The royalty fees collected when transferring the token
         RoyaltyFee[] royaltyFees;
-        /// The ID of the network ledger
+        // The ID of the network ledger
         string ledgerId;
     }
 
     /// Additional fungible properties of a Hedera Token.
     struct FungibleTokenInfo {
-        /// The shared hedera token info
+        // The shared hedera token info
         TokenInfo tokenInfo;
-        /// The number of decimal places a token is divisible by
+        // The number of decimal places a token is divisible by
         int32 decimals;
     }
 
     /// Additional non fungible properties of a Hedera Token.
     struct NonFungibleTokenInfo {
-        /// The shared hedera token info
+        // The shared hedera token info
         TokenInfo tokenInfo;
-        /// The serial number of the nft
+        // The serial number of the nft
         int64 serialNumber;
-        /// The account id specifying the owner of the non fungible token
+        // The account id specifying the owner of the non fungible token
         address ownerId;
-        /// The epoch second at which the token was created.
+        // The epoch second at which the token was created.
         int64 creationTime;
-        /// The unique metadata of the NFT
+        // The unique metadata of the NFT
         bytes metadata;
-        /// The account id specifying an account that has been granted spending permissions on this nft
+        // The account id specifying an account that has been granted spending permissions on this nft
         address spenderId;
     }
 
@@ -252,7 +252,7 @@ interface IHederaTokenService {
     /// Performs transfers among combinations of tokens and hbars
     /// @param transferList the list of hbar transfers to do
     /// @param tokenTransfers the list of token transfers to do
-    /// @custom:version 0.3.0 the signature of the previous version was cryptoTransfer(TokenTransferList[] memory tokenTransfers)
+    /// @dev 0.3.0 the signature of the previous version was cryptoTransfer(TokenTransferList[] memory tokenTransfers)
     function cryptoTransfer(
         TransferList memory transferList,
         TokenTransferList[] memory tokenTransfers
