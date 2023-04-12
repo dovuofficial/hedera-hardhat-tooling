@@ -177,10 +177,10 @@ contract StakableProject is HederaTokenService, Ownable {
         @param dnft_id_: the id of the entity that reputation energy (tokens) staked on it
         @param amount_: the amount of tokens to remove (will revert if the balance of the user is too low)
     **/
-    function stakeTokensToProject(string memory dnft_id_, int64 amount_)
-        external
-        hasProject(dnft_id_)
-    {
+    function stakeTokensToProject(
+        string memory dnft_id_,
+        int64 amount_
+    ) external hasProject(dnft_id_) {
         // Update token state for different projects
         projects[dnft_id_].balance += amount_;
         sentTokens[dnft_id_][msg.sender] += amount_;
@@ -206,10 +206,10 @@ contract StakableProject is HederaTokenService, Ownable {
         @param dnft_id_: the id of the entity that reputation energy (tokens) staked on it
         @param amount_: the amount of tokens to remove (could be too much)
     **/
-    function unstakeTokensFromProject(string memory dnft_id_, int64 amount_)
-        external
-        hasProject(dnft_id_)
-    {
+    function unstakeTokensFromProject(
+        string memory dnft_id_,
+        int64 amount_
+    ) external hasProject(dnft_id_) {
         require(
             sentTokens[dnft_id_][msg.sender] >= amount_,
             "Unable to unstake that amount of tokens from project"
@@ -254,12 +254,9 @@ contract StakableProject is HederaTokenService, Ownable {
     /**
         @notice return the amount of verified carbon in kgs that has been assigned to an entity/project
     **/
-    function getVerifiedCarbonForProject(string memory dnft_id_)
-        external
-        view
-        hasProject(dnft_id_)
-        returns (int64)
-    {
+    function getVerifiedCarbonForProject(
+        string memory dnft_id_
+    ) external view hasProject(dnft_id_) returns (int64) {
         return projects[dnft_id_].verified_kgs;
     }
 
@@ -277,12 +274,9 @@ contract StakableProject is HederaTokenService, Ownable {
             - current kgs of verified carbon
         )
     **/
-    function getCollateralRisk(string memory dnft_id_)
-        external
-        view
-        hasProject(dnft_id_)
-        returns (int64, int64)
-    {
+    function getCollateralRisk(
+        string memory dnft_id_
+    ) external view hasProject(dnft_id_) returns (int64, int64) {
         Project memory _project = projects[dnft_id_];
 
         return (_project.balance, _project.verified_kgs);
@@ -291,24 +285,18 @@ contract StakableProject is HederaTokenService, Ownable {
     /**
         @notice retrieve the number of tokens that a entity has staked to it
     **/
-    function numberOfTokensStakedToProject(string memory dnft_id_)
-        external
-        view
-        hasProject(dnft_id_)
-        returns (int64)
-    {
+    function numberOfTokensStakedToProject(
+        string memory dnft_id_
+    ) external view hasProject(dnft_id_) returns (int64) {
         return projects[dnft_id_].balance;
     }
 
     /**
         @notice for a given entity return the number of tokens staked to it from a user
     **/
-    function getUserTokensStakedToProject(string memory dnft_id_)
-        external
-        view
-        hasProject(dnft_id_)
-        returns (int64)
-    {
+    function getUserTokensStakedToProject(
+        string memory dnft_id_
+    ) external view hasProject(dnft_id_) returns (int64) {
         return sentTokens[dnft_id_][msg.sender];
     }
 }

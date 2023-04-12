@@ -50,9 +50,9 @@ interface IHederaTokenService {
     /// Initiates a Token Transfer
     /// @param tokenTransfers the list of transfers to do
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
-    function cryptoTransfer(TokenTransferList[] memory tokenTransfers)
-        external
-        returns (int256 responseCode);
+    function cryptoTransfer(
+        TokenTransferList[] memory tokenTransfers
+    ) external returns (int256 responseCode);
 
     /// Mints an amount of the token to the defined treasury account
     /// @param token The token for which to mint tokens. If token does not exist, transaction results in
@@ -69,13 +69,7 @@ interface IHederaTokenService {
         address token,
         uint64 amount,
         bytes[] memory metadata
-    )
-        external
-        returns (
-            int256 responseCode,
-            uint64 newTotalSupply,
-            int64[] memory serialNumbers
-        );
+    ) external returns (int256 responseCode, uint64 newTotalSupply, int64[] memory serialNumbers);
 
     /// Burns an amount of the token from the defined treasury account
     /// @param token The token for which to burn tokens. If token does not exist, transaction results in
@@ -109,9 +103,10 @@ interface IHederaTokenService {
     ///               Type, once an account is associated, it can hold any number of NFTs (serial numbers) of that
     ///               token type
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
-    function associateTokens(address account, address[] memory tokens)
-        external
-        returns (int256 responseCode);
+    function associateTokens(
+        address account,
+        address[] memory tokens
+    ) external returns (int256 responseCode);
 
     /// Single-token variant of associateTokens. Will be mapped to a single entry array call of associateTokens
     /// @param account The account to be associated with the provided token
@@ -136,9 +131,10 @@ interface IHederaTokenService {
     /// @param account The account to be dissociated from the provided tokens
     /// @param tokens The tokens to be dissociated from the provided account.
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
-    function dissociateTokens(address account, address[] memory tokens)
-        external
-        returns (int256 responseCode);
+    function dissociateTokens(
+        address account,
+        address[] memory tokens
+    ) external returns (int256 responseCode);
 
     /// Single-token variant of dissociateTokens. Will be mapped to a single entry array call of dissociateTokens
     /// @param account The account to be associated with the provided token

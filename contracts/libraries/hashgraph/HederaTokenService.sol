@@ -11,10 +11,9 @@ abstract contract HederaTokenService is HederaResponseCodes {
     /// Initiates a Token Transfer
     /// @param tokenTransfers the list of transfers to do
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
-    function cryptoTransfer(IHederaTokenService.TokenTransferList[] memory tokenTransfers)
-        internal
-        returns (int256 responseCode)
-    {
+    function cryptoTransfer(
+        IHederaTokenService.TokenTransferList[] memory tokenTransfers
+    ) internal returns (int256 responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.cryptoTransfer.selector, tokenTransfers)
         );
@@ -36,14 +35,7 @@ abstract contract HederaTokenService is HederaResponseCodes {
         address token,
         uint64 amount,
         bytes[] memory metadata
-    )
-        internal
-        returns (
-            int256 responseCode,
-            uint64 newTotalSupply,
-            int64[] memory serialNumbers
-        )
-    {
+    ) internal returns (int256 responseCode, uint64 newTotalSupply, int64[] memory serialNumbers) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.mintToken.selector, token, amount, metadata)
         );
@@ -96,10 +88,10 @@ abstract contract HederaTokenService is HederaResponseCodes {
     ///               Type, once an account is associated, it can hold any number of NFTs (serial numbers) of that
     ///               token type
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
-    function associateTokens(address account, address[] memory tokens)
-        internal
-        returns (int256 responseCode)
-    {
+    function associateTokens(
+        address account,
+        address[] memory tokens
+    ) internal returns (int256 responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.associateTokens.selector, account, tokens)
         );
@@ -131,20 +123,20 @@ abstract contract HederaTokenService is HederaResponseCodes {
     /// @param account The account to be dissociated from the provided tokens
     /// @param tokens The tokens to be dissociated from the provided account.
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
-    function dissociateTokens(address account, address[] memory tokens)
-        internal
-        returns (int256 responseCode)
-    {
+    function dissociateTokens(
+        address account,
+        address[] memory tokens
+    ) internal returns (int256 responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.dissociateTokens.selector, account, tokens)
         );
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
-    function dissociateToken(address account, address token)
-        internal
-        returns (int256 responseCode)
-    {
+    function dissociateToken(
+        address account,
+        address token
+    ) internal returns (int256 responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.dissociateToken.selector, account, token)
         );
