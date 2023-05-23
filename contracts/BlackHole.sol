@@ -1,21 +1,67 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// We're just going add open zeppelin, ownable.
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./libraries/hashgraph/HederaTokenService.sol";
+import "./libraries/hashgraph/HederaResponseCodes.sol";
 
-contract BlackHole is Ownable {
-    string public message;
+contract BlackHole is HederaTokenService {
+    address blackHoleGasAddress;
 
-    constructor() {
-        message = "Black Hole!";
+    struct NFT {
+        address tokenAddress;
+        int64 serialNumber;
     }
 
-    function update(string memory newMessage) public onlyOwner {
-        message = newMessage;
+    mapping(address => NFT[]) sentNFTs;
+
+    int64 totalNFTs;
+
+    constructor(address _tokenAddress) {
+        blackHoleGasAddress = _tokenAddress;
+        totalNFTs = 0;
     }
 
-    function getMessage() public view returns (string memory) {
-        return message;
+    function castIntoBlackHole(address _tokenAddress, int64 _serialNumber) external {
+        _tokenAssociate(_tokenAddress);
+        _tokenTransfer(_tokenAddress, _serialNumber);
+    }
+
+    function _tokenAssociate(address _tokenAddress) private {
+        int256 response = HederaTokenService.associateToken(address(this), _tokenAddress);
+
+        if (
+            response != HederaResponseCodes.SUCCESS &&
+            response != HederaResponseCodes.TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT
+        ) {
+            revert("Associate Failed");
+        }
+    }
+
+    function _tokenTransfer(address _tokenAddress, int64 _serialNumber) private {
+        sentNFTs[msg.sender].push(NFT(_tokenAddress, _serialNumber));
+        totalNFTs++;
+
+        int256 response = HederaTokenService.transferNFT(
+            _tokenAddress,
+            msg.sender,
+            address(this),
+            _serialNumber
+        );
+
+        if (response != HederaResponseCodes.SUCCESS) {
+            revert("Transfer Failed");
+        }
+    }
+
+    function getTokensForAddress() public view returns (NFT[] memory) {
+        return sentNFTs[msg.sender];
+    }
+
+    function getMassOfBlackHole() public view returns (int64) {
+        return totalNFTs;
+    }
+
+    function getBlackHoleGasAddress() public view returns (address) {
+        return blackHoleGasAddress;
     }
 }
