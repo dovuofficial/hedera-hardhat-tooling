@@ -1,3 +1,9 @@
+const {
+  TokenId,
+  AccountAllowanceApproveTransaction,
+  PrivateKey,
+  Status,
+} = require("@hashgraph/sdk");
 const { expect } = require("chai");
 
 const {
@@ -13,6 +19,13 @@ describe("A contract can associate and be sent tokens", function () {
   const hashgraph = Hashgraph(client);
 
   const contractId = process.env.HTS_CONTRACT_ID;
+  const tokenId = process.env.STAKABLE_TOKEN_ID;
+  const ownerId = process.env.HEDERA_ACCOUNT_ID;
+  const ownerAccountKey = process.env.HEDERA_PRIVATE_KEY;
+
+  const spenderId = contractId;
+
+  const tokenSolidityAddress = TokenId.fromString(tokenId).toSolidityAddress();
 
   if (!contractId) {
     throw Error(
@@ -26,9 +39,7 @@ describe("A contract can associate and be sent tokens", function () {
       method: "getTokenId",
     });
 
-    expect(response.getAddress(0)).to.equal(
-      "0000000000000000000000000000000002087e5d"
-    );
+    expect(response.getAddress(0)).to.equal(tokenSolidityAddress);
   });
 
   it("A contract can associate a token", async () => {
@@ -40,11 +51,25 @@ describe("A contract can associate and be sent tokens", function () {
     expect(response).to.be.true;
   });
 
-  it("A contract can be sent a token", async () => {
+  it("A contract can transfer a token once associated", async () => {
+    const amountToTransfer = 2;
+
+    // Create the token allowance transaction.
+    // This will let the contract spend the amount of token on our behalf.
+    // The client operator must be the owner of the token.
+    const transaction = new AccountAllowanceApproveTransaction()
+      .approveTokenAllowance(tokenId, ownerId, spenderId, amountToTransfer)
+      .freezeWith(client);
+
+    const txResponse = await transaction.execute(client);
+    const receipt = await txResponse.getReceipt(client);
+
+    expect(receipt.status).to.equal(Status.Success);
+
     const response = await hashgraph.contract.call({
       contractId: contractId,
       method: "tokenTransfer",
-      params: new ContractFunctionParameters().addInt64(2),
+      params: new ContractFunctionParameters().addInt64(amountToTransfer),
     });
 
     expect(response).to.be.true;

@@ -105,6 +105,24 @@ Set up your `.env` from `.env.example` with your testnet credentials.
 
 `cp .env.example .env`
 
+## Instal NPM packages
+
+`npm install`
+
+## Hardhat Shorthand (hh)
+
+`hardhat-shorthand` is an NPM package that installs a globally accessible binary called `hh` that runs the project's locally installed `hardhat` and supports shell autocompletion for tasks.
+
+### Installation
+
+To use the Hardhat shorthand you need to install it **globally**:
+
+```
+npm i -g hardhat-shorthand
+```
+
+After doing this running `hh` will be equivalent to running `npx hardhat`. For example, instead of running `npx hardhat compile` you can run `hh compile`.
+
 ## Run Tests
 
 These tests will compile your contracts and deploy them.
@@ -120,7 +138,7 @@ If you try to deploy contracts but they fail try compiling them, this will autom
 ## Deploying contracts to Hedera
 
 Use this commands to deploy contracts to the testnet, Later on will add support for production/preview releases. The hardhat system generates compiled bytecode that can be picked up through the Native Hedera libs without manual intervention.
-s
+
 `hardhat deploy --contract HelloWorld`
 
 ## Hardhat Help
@@ -130,17 +148,3 @@ You just come in below to interrogates what methods are available for hardhat, i
 ```
 npx hardhat help
 ```
-
-## Hardhat Shorthand (hh)
-
-`hardhat-shorthand` is an NPM package that installs a globally accessible binary called `hh` that runs the project's locally installed `hardhat` and supports shell autocompletion for tasks.
-
-### Installation
-
-To use the Hardhat shorthand you need to install it **globally**:
-
-```
-npm i -g hardhat-shorthand
-```
-
-After doing this running `hh` will be equivalent to running `npx hardhat`. For example, instead of running `npx hardhat compile` you can run `hh compile`.
